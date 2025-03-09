@@ -24,6 +24,7 @@ wheel = "^0.45.1"
 dm-tree = "^0.1.9"
 tfds-nightly = "^4.9.7.dev202503080044"
 keras = "^3.9.0"
+nltk = "^3.9.1"
 
 [build-system]
 requires = ["poetry-core"]
