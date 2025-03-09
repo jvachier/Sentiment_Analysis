@@ -32,6 +32,13 @@ MANIFEST
 *.manifest
 *.spec
 
+
+# data
+*data/
+
+*.ruff_cache/
+
+*.DS_Store
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
