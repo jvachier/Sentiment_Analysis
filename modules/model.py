@@ -81,7 +81,7 @@ class SentimentModelBert:
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
         model.summary()
-        history = model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
+        model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
@@ -141,6 +141,6 @@ class SentimentModel:
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
         model.summary()
-        history = model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
+        model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
