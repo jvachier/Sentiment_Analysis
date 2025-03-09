@@ -63,6 +63,7 @@ def main():
 
     ## build the model
     bi_lstm_model = tf.keras.Sequential()
+    bi_lstm_model.add(tf.keras.Input(shape=(None,), dtype="int64"))
     bi_lstm_model.add(
         tf.keras.layers.Embedding(
             input_dim=vocab_size, output_dim=embedding_dim, name="embed-layer"
