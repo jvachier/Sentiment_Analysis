@@ -4,9 +4,34 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from collections import Counter
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+import string
 
-# def pre_process_data():
-#     return
+# Download NLTK data
+nltk.download("punkt_tab")
+nltk.download("stopwords")
+nltk.download("wordnet")
+
+# Initialize NLTK tools
+stop_words = set(stopwords.words("english"))
+lemmatizer = WordNetLemmatizer()
+
+
+def preprocess_text(text):
+    # Tokenize the text
+    tokens = word_tokenize(text)
+    # Convert to lower case
+    tokens = [token.lower() for token in tokens]
+    # Remove punctuation
+    tokens = [token for token in tokens if token.isalnum()]
+    # Remove stop words
+    tokens = [token for token in tokens if token not in stop_words]
+    # Lemmatize the tokens
+    tokens = [lemmatizer.lemmatize(token) for token in tokens]
+    return " ".join(tokens)
 
 
 def encode_map_fn(text, label):
@@ -15,6 +40,7 @@ def encode_map_fn(text, label):
 
 def encode(text_tensor, label):
     text = text_tensor.numpy().decode("utf-8")
+    text = preprocess_text(text)  # Preprocess the text
     encoded_text = tokenizer.texts_to_sequences([text])[0]
     return encoded_text, label
 
@@ -24,17 +50,19 @@ def main():
     df = pd.read_csv("./data/tripadvisor_hotel_reviews.csv", encoding="utf-8")
     target = df.pop("Rating")
     ds_raw = tf.data.Dataset.from_tensor_slices((df["Review"].values, target.values))
+
     tf.random.set_seed(1)
 
     ds_raw = ds_raw.shuffle(len(df), reshuffle_each_iteration=False)
 
-    ds_raw_test = ds_raw.take(int(len(df) * 0.5))
-    ds_raw_train_valid = ds_raw.skip(int(len(df) * 0.5))
-    ds_raw_train = ds_raw_train_valid.take(5000)
-    ds_raw_valid = ds_raw_train_valid.skip(5000)
+    ds_raw_test = ds_raw.take(int(len(df) * 0.2))
+    ds_raw_train_valid = ds_raw.skip(int(len(df) * 0.2))
+    ds_raw_train = ds_raw_train_valid.take(int(len(ds_raw_train_valid) * 0.8))
+    ds_raw_valid = ds_raw_train_valid.skip(int(len(ds_raw_train_valid) * 0.8))
 
     tokenizer = tf.keras.preprocessing.text.Tokenizer()
     reviews = [review.numpy().decode("utf-8") for review, _ in ds_raw]
+    reviews = [preprocess_text(review) for review in reviews]  # Preprocess the reviews
     tokenizer.fit_on_texts(reviews)
     token_counts = Counter(
         token for text in reviews for token in tokenizer.texts_to_sequences([text])[0]
@@ -51,13 +79,11 @@ def main():
     #     print("Sequence length:", example[0].shape)
 
     ## batching the datasets
-    train_data = ds_train.padded_batch(16, padded_shapes=([-1], []))
+    train_data = ds_train.padded_batch(32, padded_shapes=([-1], []))
+    valid_data = ds_valid.padded_batch(32, padded_shapes=([-1], []))
+    test_data = ds_test.padded_batch(32, padded_shapes=([-1], []))
 
-    valid_data = ds_valid.padded_batch(16, padded_shapes=([-1], []))
-
-    test_data = ds_test.padded_batch(16, padded_shapes=([-1], []))
-
-    embedding_dim = 20
+    embedding_dim = 50
     vocab_size = len(token_counts) + 2
     num_classes = target.nunique()  # Number of unique classes in the target
 
@@ -71,44 +97,34 @@ def main():
     )
     bi_lstm_model.add(
         tf.keras.layers.Bidirectional(
-            tf.keras.layers.LSTM(64, return_sequences=True, name="lstm-layer"),
+            tf.keras.layers.LSTM(128, return_sequences=True, name="lstm-layer"),
             name="bidir-lstm1",
         )
     )
     bi_lstm_model.add(
         tf.keras.layers.Bidirectional(
-            tf.keras.layers.LSTM(64, return_sequences=False, name="lstm-layer"),
+            tf.keras.layers.LSTM(128, return_sequences=False, name="lstm-layer"),
             name="bidir-lstm2",
         )
     )
+    bi_lstm_model.add(tf.keras.layers.Dropout(0.5))
+    bi_lstm_model.add(tf.keras.layers.Dense(128, activation="gelu"))
+    bi_lstm_model.add(tf.keras.layers.Dropout(0.5))
     bi_lstm_model.add(tf.keras.layers.Dense(64, activation="gelu"))
-    bi_lstm_model.add(tf.keras.layers.Dense(32, activation="gelu"))
     bi_lstm_model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
     bi_lstm_model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
         metrics=["accuracy"],
     )
 
     bi_lstm_model.summary()
 
-    history = bi_lstm_model.fit(train_data, validation_data=valid_data, epochs=10)
+    history = bi_lstm_model.fit(train_data, validation_data=valid_data, epochs=20)
 
     ## evaluate on the test data
     test_results = bi_lstm_model.evaluate(test_data)
     print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
-
-    # tokenizer = tf.keras.preprocessing.text.Tokenizer()
-    # tokenizer.fit_on_texts(df['Review'])
-    # token_counts = Counter(token for text in df['Review'] for token in tokenizer.texts_to_sequences([text])[0])
-
-    # print('Vocab-size:', len(tokenizer.word_index))
-    # print('Token counts:', token_counts)
-
-    # tf_keras_encoded = tokenizer.texts_to_sequences(df['Review'])
-    # print(tf_keras_encoded)
-
-    # tf.keras.models.Sequential()
 
 
 if __name__ == "__main__":
