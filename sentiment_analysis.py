@@ -55,7 +55,7 @@ def main():
                 vocab_size, num_classes, train_data, valid_data, test_data
             )
         else:
-            if os.path.isfile("../models/sentiment.keras") is False:
+            if os.path.isfile("./models/sentiment.keras") is False:
                 model = sentiment_model.build_model(vocab_size, num_classes)
                 sentiment_model.train_and_evaluate(
                     model, train_data, valid_data, test_data
