@@ -1,5 +1,8 @@
 import tensorflow as tf
 from transformers import TFBertModel, BertTokenizer
+import os
+import optuna
+import json
 
 
 class SentimentModelBert:
@@ -92,15 +95,13 @@ class SentimentModel:
         embedding_dim=50,
         lstm_units=128,
         dropout_rate=0.5,
-        learning_rate=1e-4,
-        batch_size=32,
+        learning_rate=0.00015044203529185292,
         epochs=10,
     ):
         self.embedding_dim = embedding_dim
         self.lstm_units = lstm_units
         self.dropout_rate = dropout_rate
         self.learning_rate = learning_rate
-        self.batch_size = batch_size
         self.epochs = epochs
 
     def build_model(self, vocab_size, num_classes):
@@ -113,27 +114,26 @@ class SentimentModel:
         )
         model.add(
             tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(
-                    self.lstm_units, return_sequences=True, name="lstm-layer"
-                ),
+                tf.keras.layers.LSTM(72, return_sequences=True, name="lstm-layer"),
                 name="bidir-lstm1",
             )
         )
         model.add(
             tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(
-                    self.lstm_units, return_sequences=False, name="lstm-layer"
-                ),
+                tf.keras.layers.LSTM(72, return_sequences=False, name="lstm-layer"),
                 name="bidir-lstm2",
             )
         )
         model.add(tf.keras.layers.Dropout(self.dropout_rate))
-        model.add(tf.keras.layers.Dense(128, activation="gelu"))
+        model.add(tf.keras.layers.Dense(80, activation="gelu"))
+        model.add(tf.keras.layers.Dense(121, activation="gelu"))
         model.add(tf.keras.layers.Dropout(self.dropout_rate))
-        model.add(tf.keras.layers.Dense(64, activation="gelu"))
+        model.add(tf.keras.layers.Dense(32, activation="gelu"))
         model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
         model.compile(
-            optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=self.learning_rate),
+            optimizer=tf.keras.optimizers.legacy.RMSprop(
+                learning_rate=self.learning_rate
+            ),
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
             metrics=["accuracy"],
         )
@@ -141,6 +141,109 @@ class SentimentModel:
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
         model.summary()
-        model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
+        early_stopping_callback = tf.keras.callbacks.EarlyStopping(
+            monitor="val_loss",
+            patience=2,
+            mode="min",
+            verbose=0,
+            restore_best_weights=True,
+        )
+        with tf.device("/device:GPU:0"):
+            model.fit(
+                train_data,
+                validation_data=valid_data,
+                epochs=self.epochs,
+                callbacks=[early_stopping_callback],
+            )
+            model.save("./models/sentiment.keras")
+            test_results = model.evaluate(test_data)
+        print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
+
+    def evaluate(self, test_data):
+        model = tf.keras.models.load_model("./models/sentiment.keras")
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
+
+    def Optuna(self, vocab_size, num_classes, train_data, valid_data, test_data):
+        def _objective(trial):
+            tf.keras.backend.clear_session()
+            model = tf.keras.Sequential()
+            model.add(tf.keras.Input(shape=(None,), dtype="int32"))
+            model.add(
+                tf.keras.layers.Embedding(
+                    input_dim=vocab_size,
+                    output_dim=self.embedding_dim,
+                )
+            )
+            n_layers_bidirectional = trial.suggest_int("n_units_bidirectional", 1, 3)
+            for i in range(n_layers_bidirectional):
+                num_hidden_bidirectional = trial.suggest_int(
+                    "n_units_bidirectional_l{}".format(i), 64, 128, log=True
+                )
+                model.add(
+                    tf.keras.layers.Bidirectional(
+                        tf.keras.layers.LSTM(
+                            num_hidden_bidirectional,
+                            return_sequences=True,
+                        ),
+                    )
+                )
+            num_hidden_lstm = trial.suggest_int(
+                "n_units_lstm_l{}".format(i), 64, 128, log=True
+            )
+            model.add(
+                tf.keras.layers.Bidirectional(
+                    tf.keras.layers.LSTM(
+                        num_hidden_lstm,
+                        return_sequences=False,
+                    ),
+                )
+            )
+
+            model.add(tf.keras.layers.Dropout(self.dropout_rate))
+            n_layers_nn = trial.suggest_int("n_layers_nn", 1, 2)
+            for i in range(n_layers_nn):
+                num_hidden_nn = trial.suggest_int(
+                    "n_units_nn_l{}".format(i), 64, 128, log=True
+                )
+                model.add(tf.keras.layers.Dense(num_hidden_nn, activation="gelu"))
+
+            model.add(tf.keras.layers.Dropout(self.dropout_rate))
+            model.add(tf.keras.layers.Dense(32, activation="gelu"))
+            model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
+
+            learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
+            model.compile(
+                optimizer=tf.keras.optimizers.legacy.RMSprop(
+                    learning_rate=learning_rate
+                ),
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                metrics=["accuracy"],
+            )
+
+            early_stopping_callback = tf.keras.callbacks.EarlyStopping(
+                monitor="val_loss",
+                patience=2,
+                mode="min",
+                verbose=0,
+                restore_best_weights=True,
+            )
+            with tf.device("/device:GPU:0"):
+                model.fit(
+                    train_data,
+                    validation_data=valid_data,
+                    epochs=int(self.epochs / 2),
+                    callbacks=[early_stopping_callback],
+                    verbose=1,
+                )
+            # Evaluate the model accuracy on the validation set.
+            score = model.evaluate(test_data, verbose=1)
+            return score[1]
+
+        study = optuna.create_study(direction="maximize")
+        study.optimize(
+            _objective,
+            n_trials=5,
+        )
+        with open("./models/optuna_model.json", "w") as outfile:
+            json.dump(study.best_params, outfile)

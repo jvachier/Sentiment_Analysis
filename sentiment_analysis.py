@@ -1,8 +1,10 @@
 from modules.load_data import DataLoader
 from modules.data_preprocess import TextPreprocessor
 from modules.model import SentimentModel, SentimentModelBert
+import os
 
 BERT = False
+OPTUNA = False
 
 
 def main():
@@ -11,7 +13,6 @@ def main():
 
     # Sentiment with BERT
     if BERT:
-        sentiment_model = SentimentModelBert()
         sentiment_model = SentimentModelBert()
         train_data = sentiment_model.prepare_data(
             ds_raw_train, sentiment_model.batch_size
@@ -49,8 +50,18 @@ def main():
         num_classes = target.nunique()
 
         sentiment_model = SentimentModel()
-        model = sentiment_model.build_model(vocab_size, num_classes)
-        sentiment_model.train_and_evaluate(model, train_data, valid_data, test_data)
+        if OPTUNA:
+            sentiment_model.Optuna(
+                vocab_size, num_classes, train_data, valid_data, test_data
+            )
+        else:
+            if os.path.isfile("../models/sentiment.keras") is False:
+                model = sentiment_model.build_model(vocab_size, num_classes)
+                sentiment_model.train_and_evaluate(
+                    model, train_data, valid_data, test_data
+                )
+            else:
+                sentiment_model.evaluate(test_data)
 
 
 if __name__ == "__main__":
