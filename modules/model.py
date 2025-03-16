@@ -1,6 +1,5 @@
 import tensorflow as tf
 from transformers import TFBertModel, BertTokenizer
-import os
 import optuna
 import json
 
