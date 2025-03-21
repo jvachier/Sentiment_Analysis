@@ -7,6 +7,16 @@ from dash.dependencies import Input, Output, State
 import threading
 import base64
 import json
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from modules.data_preprocess import TextPreprocessorNoLabel
+from modules.model import SentimentModel
+from io import StringIO
+
+# Load the sentiment analysis model
+sentiment_model = SentimentModel()
+model = tf.keras.models.load_model("./models/sentiment.keras")
 
 
 class SpeechToText:
@@ -64,10 +74,42 @@ class SpeechToText:
     def get_recognized_text(self):
         return " ".join(self.recognized_text)
 
+    def predict_sentiment(self, text):
+        tf.keras.backend.clear_session()
+        # # Preprocess the text using TextPreprocessorNoLabel
+        text_preprocessor = TextPreprocessorNoLabel()
+        # preprocessed_text = text_preprocessor.preprocess_text(text)
+        # # Tokenize and pad the text as required by the model
+        # tokenizer = tf.keras.preprocessing.text.Tokenizer()
+        # tokenizer.fit_on_texts([preprocessed_text])
+        # tokenized_text = tokenizer.texts_to_sequences([preprocessed_text])
+        # padded_text = tf.keras.preprocessing.sequence.pad_sequences(
+        #     tokenized_text, maxlen=100
+        # )
+        # Convert string to StringIO object
+        data_io = StringIO(text)
+        # Read the string as if it were a CSV file
+        df = pd.read_csv(data_io, header=None, columns=["Review"])
+        ds_test = df.map(lambda text: text_preprocessor.encode_map_fn(text))
+        test_data = ds_test.padded_batch(32, padded_shapes=([-1]))
+        print(test_data)
+
+        # prediction = model.predict(padded_text)
+        prediction = model.predict(test_data)
+        negative, neutral, positive = prediction[0]
+        print(negative, neutral, positive)
+        if positive > 0.6:
+            sentiment = "Positive"
+        elif negative > 0.6:
+            sentiment = "Negative"
+        else:
+            sentiment = "Neutral"
+        return sentiment
+
 
 # Initialize the SpeechToText class
-# speech_to_text = SpeechToText(model_path="./vosk-model-en-us-0.22")
-speech_to_text = SpeechToText(model_path="vosk-model-small-sv-rhasspy-0.15")
+speech_to_text = SpeechToText(model_path="./vosk-model-en-us-0.22")
+# speech_to_text = SpeechToText(model_path="vosk-model-small-sv-rhasspy-0.15")
 
 app = dash.Dash(__name__)
 
@@ -77,6 +119,7 @@ app.layout = html.Div(
         html.Button("Start Recording", id="start-record-button", n_clicks=0),
         html.Button("Stop Recording", id="stop-record-button", n_clicks=0),
         html.Div(id="recognized-text"),
+        html.Div(id="sentiment-result"),
         html.A(
             "Download Recognized Text",
             id="download-link",
@@ -92,6 +135,7 @@ app.layout = html.Div(
 @app.callback(
     [
         Output("recognized-text", "children"),
+        Output("sentiment-result", "children"),
         Output("download-link", "href"),
         Output("recording-state", "data"),
     ],
@@ -102,15 +146,16 @@ def update_output(start_n_clicks, stop_n_clicks, recording_state):
     if start_n_clicks > stop_n_clicks and not recording_state:
         speech_to_text.start_recording()
         start_n_clicks = 0
-        return "Recording...", "", True
+        return "Recording...", "", "", True
     elif stop_n_clicks > start_n_clicks and recording_state:
         speech_to_text.stop_recording()
         recognized_text = speech_to_text.get_recognized_text()
+        sentiment = speech_to_text.predict_sentiment(recognized_text)
         encoded_text = base64.b64encode(recognized_text.encode()).decode()
         href = f"data:text/plain;base64,{encoded_text}"
         stop_n_clicks = 0
-        return recognized_text, href, False
-    return "", "", recording_state
+        return recognized_text, f"Sentiment: {sentiment}", href, False
+    return "", "", "", recording_state
 
 
 if __name__ == "__main__":
