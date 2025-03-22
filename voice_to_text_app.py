@@ -8,6 +8,7 @@ import threading
 import base64
 import json
 import tensorflow as tf
+from modules.model import SentimentModel
 
 
 class SpeechToText:
@@ -65,21 +66,21 @@ class SpeechToText:
     def get_recognized_text(self):
         return " ".join(self.recognized_text)
 
-    def predict_sentiment(self, text=None):
+    def predict_sentiment(self, text: list):
+        sentiment_model = SentimentModel()
         model = tf.keras.models.load_model("./models/sentiment_binary.keras")
-        if text is None:
-            text = "Very bad."
 
         # Create a TextVectorization layer
         vectorize_layer = tf.keras.layers.TextVectorization(
             max_tokens=20000, output_mode="tf_idf"
         )
-
+        # from literalstring to string
+        text = text.decode("string-escape")
         # Adapt the vectorize_layer to the text data
-        vectorize_layer.adapt([text])
+        vectorize_layer.adapt(text)
 
         # Vectorize the input text
-        vectorized_text = vectorize_layer([text])
+        vectorized_text = vectorize_layer(text)
 
         # Make predictions
         prediction = model.predict(vectorized_text)
@@ -94,26 +95,47 @@ class SpeechToText:
 speech_to_text = SpeechToText(model_path="./vosk-model-en-us-0.22")
 # speech_to_text = SpeechToText(model_path="vosk-model-small-sv-rhasspy-0.15")
 
-sentiment = speech_to_text.predict_sentiment()
-
 app = dash.Dash(__name__)
+app.title = "Speech to Text Sentiment Analysis"
 
 app.layout = html.Div(
-    [
-        html.H1("Speech to Text"),
-        html.Button("Start Recording", id="start-record-button", n_clicks=0),
-        html.Button("Stop Recording", id="stop-record-button", n_clicks=0),
-        html.Div(id="recognized-text"),
-        html.Div(id="sentiment-result"),
+    style={
+        "fontFamily": "Arial, sans-serif",
+        "margin": "0 auto",
+        "maxWidth": "800px",
+        "padding": "20px",
+    },
+    children=[
+        html.H1("Speech to Text Sentiment Analysis", style={"textAlign": "center"}),
+        html.Div(
+            style={"textAlign": "center", "marginBottom": "20px"},
+            children=[
+                html.Button(
+                    "Start Recording",
+                    id="start-record-button",
+                    n_clicks=0,
+                    style={"marginRight": "10px"},
+                ),
+                html.Button("Stop Recording", id="stop-record-button", n_clicks=0),
+            ],
+        ),
+        html.Div(
+            id="recognized-text",
+            style={"whiteSpace": "pre-wrap", "marginBottom": "20px"},
+        ),
+        html.Div(
+            id="sentiment-result", style={"fontWeight": "bold", "marginBottom": "20px"}
+        ),
         html.A(
             "Download Recognized Text",
             id="download-link",
             download="recognized_text.txt",
             href="",
             target="_blank",
+            style={"display": "block", "textAlign": "center", "marginBottom": "20px"},
         ),
         dcc.Store(id="recording-state", data=False),
-    ]
+    ],
 )
 
 
@@ -135,8 +157,11 @@ def update_output(start_n_clicks, stop_n_clicks, recording_state):
     elif stop_n_clicks > start_n_clicks and recording_state:
         speech_to_text.stop_recording()
         recognized_text = speech_to_text.get_recognized_text()
-        sentiment = speech_to_text.predict_sentiment(recognized_text)
+        # if not recognized_text:
+        #     return "No speech detected", "", "", False
+        sentiment = speech_to_text.predict_sentiment(text=recognized_text)
         encoded_text = base64.b64encode(recognized_text.encode()).decode()
+
         href = f"data:text/plain;base64,{encoded_text}"
         stop_n_clicks = 0
         return recognized_text, f"Sentiment: {sentiment}", href, False
