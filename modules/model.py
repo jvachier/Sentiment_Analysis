@@ -72,7 +72,6 @@ class SentimentModelBert:
         bert_output = bert_model(input_ids, attention_mask=attention_mask)
         cls_token = bert_output.last_hidden_state[:, 0, :]
         dropout = tf.keras.layers.Dropout(0.3)(cls_token)
-        # output = tf.keras.layers.Dense(num_classes, activation="softmax")(dropout)
         output = tf.keras.layers.Dense(1, activation="sigmoid")(dropout)
 
         model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs=output)
@@ -80,7 +79,6 @@ class SentimentModelBert:
             optimizer=tf.keras.optimizers.legacy.RMSprop(
                 learning_rate=self.learning_rate
             ),
-            # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=["accuracy"],
         )
@@ -134,13 +132,11 @@ class SentimentModel:
         model.add(tf.keras.layers.Dense(75, activation="gelu"))
         model.add(tf.keras.layers.Dropout(self.dropout_rate))
         model.add(tf.keras.layers.Dense(32, activation="gelu"))
-        # model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
         model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
         model.compile(
             optimizer=tf.keras.optimizers.legacy.RMSprop(
                 learning_rate=self.learning_rate
             ),
-            # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=["accuracy"],
         )
@@ -180,7 +176,6 @@ class SentimentModel:
         model = tf.keras.models.load_model("./models/sentiment_binary.keras")
         predictions = model.predict(predict_data)
         y_classes = predictions.argmax(axis=-1)
-        # print(y_classes, predictions)
         return y_classes, predictions
 
     def Optuna(self, vocab_size, num_classes, train_data, valid_data, test_data):
@@ -229,7 +224,6 @@ class SentimentModel:
 
             model.add(tf.keras.layers.Dropout(self.dropout_rate))
             model.add(tf.keras.layers.Dense(32, activation="gelu"))
-            # model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
             model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
 
             learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
@@ -237,7 +231,6 @@ class SentimentModel:
                 optimizer=tf.keras.optimizers.legacy.RMSprop(
                     learning_rate=learning_rate
                 ),
-                # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
                 loss=tf.keras.losses.BinaryCrossentropy(),
                 metrics=["accuracy"],
             )
