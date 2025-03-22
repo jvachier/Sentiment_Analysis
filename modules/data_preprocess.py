@@ -7,9 +7,9 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
 # Download NLTK data
-nltk.download("punkt_tab")
-nltk.download("stopwords")
-nltk.download("wordnet")
+# nltk.download("punkt_tab")
+# nltk.download("stopwords")
+# nltk.download("wordnet")
 
 # Initialize NLTK tools
 stop_words = set(stopwords.words("english"))

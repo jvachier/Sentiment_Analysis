@@ -8,9 +8,6 @@ class DataLoader:
 
     def load_data(self):
         df = pd.read_csv(self.data_path, encoding="utf-8")
-        # df.loc[df.Rating < 3, "Label"] = 0
-        # df.loc[df.Rating == 3, "Label"] = 1
-        # df.loc[df.Rating > 3, "Label"] = 2
         df.loc[df.Rating < 3, "Label"] = 0
         df.loc[df.Rating >= 3, "Label"] = 1
         df["Label"] = df["Label"].astype(int)
