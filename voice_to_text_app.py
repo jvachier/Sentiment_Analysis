@@ -95,9 +95,6 @@ speech_to_text = SpeechToText(model_path="./vosk-model-en-us-0.22")
 # speech_to_text = SpeechToText(model_path="vosk-model-small-sv-rhasspy-0.15")
 
 sentiment = speech_to_text.predict_sentiment()
-print(sentiment)
-
-quit()
 
 app = dash.Dash(__name__)
 
