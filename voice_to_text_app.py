@@ -83,7 +83,7 @@ class SpeechToText:
 
         # Make predictions
         prediction = model.predict(vectorized_text)
-        if prediction[0] > 0.5:
+        if prediction[0] > 0.51:
             sentiment = "Positive"
         else:
             sentiment = "Negative"
