@@ -2,6 +2,9 @@ from modules.load_data import DataLoader
 from modules.data_preprocess import TextPreprocessor
 from modules.model import SentimentModel, SentimentModelBert
 import os
+import tensorflow as tf
+import pandas as pd
+import numpy as np
 
 BERT = False
 OPTUNA = False
@@ -55,13 +58,69 @@ def main():
                 vocab_size, num_classes, train_data, valid_data, test_data
             )
         else:
-            if os.path.isfile("./models/sentiment.keras") is False:
+            if os.path.isfile("./models/sentiment_binary.keras") is False:
                 model = sentiment_model.build_model(vocab_size, num_classes)
                 sentiment_model.train_and_evaluate(
                     model, train_data, valid_data, test_data
                 )
             else:
                 sentiment_model.evaluate(test_data)
+                # df = pd.read_csv(
+                #     "./data/tripadvisor_hotel_reviews.csv", encoding="utf-8"
+                # )
+                # df.loc[df.Rating < 3, "Label"] = 0
+                # df.loc[df.Rating == 3, "Label"] = 1
+                # df.loc[df.Rating > 3, "Label"] = 2
+                # df["Label"] = df["Label"].astype(int)
+                # list_eval = []
+                # list_predic = []
+                # for i in range(0, 100):
+                #     a = np.random.randint(0, 1000)
+                #     example_text = df["Review"].iloc[a]
+                #     rating = df["Rating"].iloc[a]
+                #     label = df["Label"].iloc[a]
+                #     print(label)
+                #     df_test = pd.DataFrame({"Review": [example_text], "Label": label})
+                #     target = df_test.pop("Label")
+                #     ds_raw = tf.data.Dataset.from_tensor_slices(
+                #         (df_test["Review"].values, target.values)
+                #     )
+                #     text_preprocessor.fit_tokenizer(ds_raw)
+
+                #     ds_final = ds_raw.map(
+                #         lambda text, label: text_preprocessor.encode_map_fn(text, label)
+                #     )
+
+                #     final = ds_final.padded_batch(32, padded_shapes=([-1], []))
+
+                #     # Preprocess the example text
+                #     preprocessed_text = text_preprocessor.preprocess_text(example_text)
+
+                #     # ds_raw = tf.data.Dataset.from_tensor_slices(
+                #     #     (example_text.values, label.values)
+                #     # )
+                #     # text_preprocessor.fit_tokenizer(ds_raw)
+
+                #     # ds_final = ds_raw.map(
+                #     #     lambda text, label: text_preprocessor.encode_map_fn(text, label)
+                #     # )
+
+                #     # final = ds_final.padded_batch(32, padded_shapes=([-1], []))
+
+                #     # # Preprocess the example text
+                #     preprocessed_text = text_preprocessor.preprocess_text(example_text)
+                #     encoded_text = text_preprocessor.tokenizer.texts_to_sequences(
+                #         [preprocessed_text]
+                #     )
+                #     padded_text = tf.keras.preprocessing.sequence.pad_sequences(
+                #         encoded_text, maxlen=None
+                #     )
+                #     # Make predictions
+                #     y_classes, predictions = sentiment_model.predict_text(padded_text)
+                #     test_results = sentiment_model.evaluate_text(final)
+                #     list_eval.append(test_results)
+                #     list_predic.append(y_classes)
+                # print(np.mean(np.array(list_eval)))
 
 
 if __name__ == "__main__":

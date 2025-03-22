@@ -2,6 +2,7 @@ import tensorflow as tf
 from transformers import TFBertModel, BertTokenizer
 import optuna
 import json
+import numpy as np
 
 
 class SentimentModelBert:
@@ -9,9 +10,9 @@ class SentimentModelBert:
         self,
         model_name="bert-base-uncased",
         max_length=128,
-        learning_rate=1e-5,
+        learning_rate=1e-4,
         batch_size=32,
-        epochs=20,
+        epochs=5,
     ):
         self.model_name = model_name
         self.max_length = max_length
@@ -83,7 +84,8 @@ class SentimentModelBert:
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
         model.summary()
-        model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
+        with tf.device("/device:GPU:0"):
+            model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
@@ -94,7 +96,7 @@ class SentimentModel:
         embedding_dim=50,
         lstm_units=128,
         dropout_rate=0.5,
-        learning_rate=0.00015044203529185292,
+        learning_rate=0.0008659430202504234,
         epochs=10,
     ):
         self.embedding_dim = embedding_dim
@@ -113,27 +115,29 @@ class SentimentModel:
         )
         model.add(
             tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(72, return_sequences=True, name="lstm-layer"),
+                tf.keras.layers.LSTM(80, return_sequences=True, name="lstm-layer"),
                 name="bidir-lstm1",
             )
         )
         model.add(
             tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(72, return_sequences=False, name="lstm-layer"),
+                tf.keras.layers.LSTM(121, return_sequences=False, name="lstm-layer"),
                 name="bidir-lstm2",
             )
         )
         model.add(tf.keras.layers.Dropout(self.dropout_rate))
-        model.add(tf.keras.layers.Dense(80, activation="gelu"))
-        model.add(tf.keras.layers.Dense(121, activation="gelu"))
+        model.add(tf.keras.layers.Dense(67, activation="gelu"))
+        model.add(tf.keras.layers.Dense(75, activation="gelu"))
         model.add(tf.keras.layers.Dropout(self.dropout_rate))
         model.add(tf.keras.layers.Dense(32, activation="gelu"))
-        model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
+        # model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
+        model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
         model.compile(
             optimizer=tf.keras.optimizers.legacy.RMSprop(
                 learning_rate=self.learning_rate
             ),
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+            # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+            loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=["accuracy"],
         )
         return model
@@ -154,14 +158,26 @@ class SentimentModel:
                 epochs=self.epochs,
                 callbacks=[early_stopping_callback],
             )
-            model.save("./models/sentiment.keras")
+            model.save("./models/sentiment_binary.keras")
             test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
     def evaluate(self, test_data):
-        model = tf.keras.models.load_model("./models/sentiment.keras")
+        model = tf.keras.models.load_model("./models/sentiment_binary.keras")
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
+
+    def evaluate_text(self, test_data):
+        model = tf.keras.models.load_model("./models/sentiment_binary.keras")
+        test_results = model.evaluate(test_data)
+        return test_results[1]
+
+    def predict_text(self, predict_data):
+        model = tf.keras.models.load_model("./models/sentiment_binary.keras")
+        predictions = model.predict(predict_data)
+        y_classes = predictions.argmax(axis=-1)
+        # print(y_classes, predictions)
+        return y_classes, predictions
 
     def Optuna(self, vocab_size, num_classes, train_data, valid_data, test_data):
         def _objective(trial):
@@ -209,14 +225,16 @@ class SentimentModel:
 
             model.add(tf.keras.layers.Dropout(self.dropout_rate))
             model.add(tf.keras.layers.Dense(32, activation="gelu"))
-            model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
+            # model.add(tf.keras.layers.Dense(num_classes, activation="softmax"))
+            model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
 
             learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
             model.compile(
                 optimizer=tf.keras.optimizers.legacy.RMSprop(
                     learning_rate=learning_rate
                 ),
-                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                # loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+                loss=tf.keras.losses.BinaryCrossentropy(),
                 metrics=["accuracy"],
             )
 
@@ -244,5 +262,5 @@ class SentimentModel:
             _objective,
             n_trials=5,
         )
-        with open("./models/optuna_model.json", "w") as outfile:
+        with open("./models/optuna_model_binary.json", "w") as outfile:
             json.dump(study.best_params, outfile)

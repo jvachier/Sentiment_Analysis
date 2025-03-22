@@ -61,7 +61,7 @@ class TextPreprocessorNoLabel:
     def preprocess_text(self, text):
         tokens = word_tokenize(text)
         tokens = [token.lower() for token in tokens]
-        tokens = [token for token in tokens if token.isalnum()]
+        tokens = [token for token in tokens if token is not None and token.isalnum()]
         tokens = [token for token in tokens if token not in self.stop_words]
         tokens = [self.lemmatizer.lemmatize(token) for token in tokens]
         return " ".join(tokens)
@@ -76,7 +76,7 @@ class TextPreprocessorNoLabel:
         return encoded_text
 
     def fit_tokenizer(self, ds_raw):
-        reviews = [review.numpy().decode("utf-8") for review, _ in ds_raw]
+        reviews = [review for review in ds_raw["Review"]]
         reviews = [self.preprocess_text(review) for review in reviews]
         self.tokenizer = tf.keras.preprocessing.text.Tokenizer()
         self.tokenizer.fit_on_texts(reviews)
