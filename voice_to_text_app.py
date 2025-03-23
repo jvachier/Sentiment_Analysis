@@ -10,6 +10,7 @@ import json
 import tensorflow as tf
 
 # from modules.model_bert_other import SentimentModel
+from modules.model import SentimentModelKeras
 
 
 class SpeechToText:
@@ -68,19 +69,8 @@ class SpeechToText:
         return " ".join(self.recognized_text)
 
     def predict_sentiment(self, text):
+        sentiment = SentimentModelKeras()
         inference_model = tf.keras.models.load_model("./models/inference_model.keras")
-
-        # # Create a TextVectorization layer
-        # vectorize_layer = tf.keras.layers.TextVectorization(
-        #     max_tokens=20000, output_mode="tf_idf"
-        # )
-        # # from literalstring to string
-        text = text.decode("string-escape")
-        # # Adapt the vectorize_layer to the text data
-        # vectorize_layer.adapt(text)
-
-        # # Vectorize the input text
-        # vectorized_text = vectorize_layer(text)
         raw_text_data = tf.convert_to_tensor([text])
         # Make predictions
         prediction = inference_model.predict(raw_text_data)
