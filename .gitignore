@@ -176,3 +176,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+optuna_model.json
+*.keras
+models/
+vosk-model-en-us-0.22/
+vosk-model-small-sv-rhasspy-0.15/
+recognized_text.txt
