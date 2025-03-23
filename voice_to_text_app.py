@@ -8,7 +8,8 @@ import threading
 import base64
 import json
 import tensorflow as tf
-from modules.model import SentimentModel
+
+# from modules.model_bert_other import SentimentModel
 
 
 class SpeechToText:
@@ -66,24 +67,23 @@ class SpeechToText:
     def get_recognized_text(self):
         return " ".join(self.recognized_text)
 
-    def predict_sentiment(self, text: list):
-        sentiment_model = SentimentModel()
-        model = tf.keras.models.load_model("./models/sentiment_binary.keras")
+    def predict_sentiment(self, text):
+        inference_model = tf.keras.models.load_model("./models/inference_model.keras")
 
-        # Create a TextVectorization layer
-        vectorize_layer = tf.keras.layers.TextVectorization(
-            max_tokens=20000, output_mode="tf_idf"
-        )
-        # from literalstring to string
+        # # Create a TextVectorization layer
+        # vectorize_layer = tf.keras.layers.TextVectorization(
+        #     max_tokens=20000, output_mode="tf_idf"
+        # )
+        # # from literalstring to string
         text = text.decode("string-escape")
-        # Adapt the vectorize_layer to the text data
-        vectorize_layer.adapt(text)
+        # # Adapt the vectorize_layer to the text data
+        # vectorize_layer.adapt(text)
 
-        # Vectorize the input text
-        vectorized_text = vectorize_layer(text)
-
+        # # Vectorize the input text
+        # vectorized_text = vectorize_layer(text)
+        raw_text_data = tf.convert_to_tensor([text])
         # Make predictions
-        prediction = model.predict(vectorized_text)
+        prediction = inference_model.predict(raw_text_data)
         if prediction[0] > 0.51:
             sentiment = "Positive"
         else:
