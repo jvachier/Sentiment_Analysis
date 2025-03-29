@@ -6,6 +6,18 @@ import numpy as np
 
 
 class SentimentModelBert:
+    """
+    A class to define, train, and evaluate a sentiment analysis model using BERT.
+
+    Attributes:
+        model_name (str): The name of the pre-trained BERT model.
+        max_length (int): The maximum sequence length for tokenization.
+        learning_rate (float): The learning rate for the optimizer.
+        batch_size (int): The batch size for training.
+        epochs (int): The number of training epochs.
+        tokenizer (BertTokenizer): The tokenizer for the BERT model.
+    """
+
     def __init__(
         self,
         model_name="bert-base-uncased",
@@ -14,6 +26,16 @@ class SentimentModelBert:
         batch_size=32,
         epochs=5,
     ):
+        """
+        Initialize the SentimentModelBert class.
+
+        Args:
+            model_name (str): The name of the pre-trained BERT model.
+            max_length (int): The maximum sequence length for tokenization.
+            learning_rate (float): The learning rate for the optimizer.
+            batch_size (int): The batch size for training.
+            epochs (int): The number of training epochs.
+        """
         self.model_name = model_name
         self.max_length = max_length
         self.learning_rate = learning_rate
@@ -22,6 +44,16 @@ class SentimentModelBert:
         self.tokenizer = BertTokenizer.from_pretrained(model_name)
 
     def encodeBB(self, text_tensor, label_tensor):
+        """
+        Encode text and label tensors into BERT-compatible input.
+
+        Args:
+            text_tensor (tf.Tensor): The input text tensor.
+            label_tensor (tf.Tensor): The label tensor.
+
+        Returns:
+            tuple: Encoded input IDs, attention masks, and labels.
+        """
         text = text_tensor.numpy().decode("utf-8")
         encoded_text = self.encodeB(text)
         return (
@@ -31,11 +63,31 @@ class SentimentModelBert:
         )
 
     def encode_map_fnB(self, text, label):
+        """
+        Map function to encode text and label into BERT-compatible input.
+
+        Args:
+            text (tf.Tensor): The input text tensor.
+            label (tf.Tensor): The label tensor.
+
+        Returns:
+            tuple: Encoded input IDs, attention masks, and labels.
+        """
         return tf.py_function(
             self.encodeBB, inp=[text, label], Tout=(tf.int32, tf.int32, tf.int64)
         )
 
     def prepare_data(self, dataset, batch_size):
+        """
+        Prepare the dataset for training by encoding and batching.
+
+        Args:
+            dataset (tf.data.Dataset): The input dataset.
+            batch_size (int): The batch size for training.
+
+        Returns:
+            tf.data.Dataset: The prepared dataset.
+        """
         dataset = dataset.map(lambda text, label: self.encode_map_fnB(text, label))
         dataset = dataset.map(
             lambda input_ids, attention_mask, label: (
@@ -50,6 +102,15 @@ class SentimentModelBert:
         return dataset
 
     def encodeB(self, texts):
+        """
+        Tokenize the input text using the BERT tokenizer.
+
+        Args:
+            texts (str or list): The input text(s) to tokenize.
+
+        Returns:
+            dict: Tokenized input IDs and attention masks.
+        """
         return self.tokenizer(
             texts,
             max_length=self.max_length,
@@ -59,6 +120,15 @@ class SentimentModelBert:
         )
 
     def build_model(self, num_classes):
+        """
+        Build and compile the BERT-based sentiment analysis model.
+
+        Args:
+            num_classes (int): The number of output classes.
+
+        Returns:
+            tf.keras.Model: The compiled BERT model.
+        """
         bert_model = TFBertModel.from_pretrained(
             self.model_name, output_hidden_states=False
         )
@@ -85,6 +155,15 @@ class SentimentModelBert:
         return model
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
+        """
+        Train and evaluate the BERT model.
+
+        Args:
+            model (tf.keras.Model): The BERT model to train.
+            train_data (tf.data.Dataset): The training dataset.
+            valid_data (tf.data.Dataset): The validation dataset.
+            test_data (tf.data.Dataset): The test dataset.
+        """
         model.summary()
         with tf.device("/device:GPU:0"):
             model.fit(train_data, validation_data=valid_data, epochs=self.epochs)
@@ -93,6 +172,17 @@ class SentimentModelBert:
 
 
 class SentimentModel:
+    """
+    A class to define, train, and evaluate a sentiment analysis model using LSTM layers.
+
+    Attributes:
+        embedding_dim (int): Dimension of the embedding layer.
+        lstm_units (int): Number of units in the LSTM layers.
+        dropout_rate (float): Dropout rate for regularization.
+        learning_rate (float): Learning rate for the optimizer.
+        epochs (int): Number of training epochs.
+    """
+
     def __init__(
         self,
         embedding_dim=50,
@@ -101,6 +191,16 @@ class SentimentModel:
         learning_rate=0.0008659430202504234,
         epochs=10,
     ):
+        """
+        Initialize the SentimentModel class with hyperparameters.
+
+        Args:
+            embedding_dim (int): Dimension of the embedding layer.
+            lstm_units (int): Number of units in the LSTM layers.
+            dropout_rate (float): Dropout rate for regularization.
+            learning_rate (float): Learning rate for the optimizer.
+            epochs (int): Number of training epochs.
+        """
         self.embedding_dim = embedding_dim
         self.lstm_units = lstm_units
         self.dropout_rate = dropout_rate
@@ -108,6 +208,16 @@ class SentimentModel:
         self.epochs = epochs
 
     def build_model(self, vocab_size, num_classes):
+        """
+        Build and compile the LSTM-based sentiment analysis model.
+
+        Args:
+            vocab_size (int): Size of the vocabulary.
+            num_classes (int): Number of output classes.
+
+        Returns:
+            tf.keras.Model: The compiled LSTM model.
+        """
         model = tf.keras.Sequential()
         model.add(tf.keras.Input(shape=(None,), dtype="int32"))
         model.add(
@@ -143,6 +253,15 @@ class SentimentModel:
         return model
 
     def train_and_evaluate(self, model, train_data, valid_data, test_data):
+        """
+        Train and evaluate the LSTM model.
+
+        Args:
+            model (tf.keras.Model): The LSTM model to train.
+            train_data (tf.data.Dataset): The training dataset.
+            valid_data (tf.data.Dataset): The validation dataset.
+            test_data (tf.data.Dataset): The test dataset.
+        """
         model.summary()
         early_stopping_callback = tf.keras.callbacks.EarlyStopping(
             monitor="val_loss",
@@ -163,23 +282,67 @@ class SentimentModel:
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
     def evaluate(self, test_data):
+        """
+        Evaluate the saved LSTM model on the test dataset.
+
+        Args:
+            test_data (tf.data.Dataset): The test dataset.
+        """
         model = tf.keras.models.load_model("./models/sentiment_binary.keras")
         test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
     def evaluate_text(self, test_data):
+        """
+        Evaluate the saved LSTM model and return the accuracy.
+
+        Args:
+            test_data (tf.data.Dataset): The test dataset.
+
+        Returns:
+            float: The accuracy of the model on the test dataset.
+        """
         model = tf.keras.models.load_model("./models/sentiment_binary.keras")
         test_results = model.evaluate(test_data)
         return test_results[1]
 
     def predict_text(self, predict_data):
+        """
+        Predict sentiment for the given data using the saved LSTM model.
+
+        Args:
+            predict_data (tf.data.Dataset): The dataset for prediction.
+
+        Returns:
+            tuple: Predicted classes and probabilities.
+        """
         model = tf.keras.models.load_model("./models/sentiment_binary.keras")
         predictions = model.predict(predict_data)
         y_classes = predictions.argmax(axis=-1)
         return y_classes, predictions
 
     def Optuna(self, vocab_size, num_classes, train_data, valid_data, test_data):
+        """
+        Perform hyperparameter optimization using Optuna.
+
+        Args:
+            vocab_size (int): Size of the vocabulary.
+            num_classes (int): Number of output classes.
+            train_data (tf.data.Dataset): The training dataset.
+            valid_data (tf.data.Dataset): The validation dataset.
+            test_data (tf.data.Dataset): The test dataset.
+        """
+
         def _objective(trial):
+            """
+            Objective function for Optuna to optimize the model's hyperparameters.
+
+            Args:
+                trial (optuna.trial.Trial): An Optuna trial object.
+
+            Returns:
+                float: Validation accuracy of the model.
+            """
             tf.keras.backend.clear_session()
             model = tf.keras.Sequential()
             model.add(tf.keras.Input(shape=(None,), dtype="int32"))
