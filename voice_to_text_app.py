@@ -147,8 +147,6 @@ def update_output(start_n_clicks, stop_n_clicks, recording_state):
     elif stop_n_clicks > start_n_clicks and recording_state:
         speech_to_text.stop_recording()
         recognized_text = speech_to_text.get_recognized_text()
-        # if not recognized_text:
-        #     return "No speech detected", "", "", False
         sentiment = speech_to_text.predict_sentiment(text=recognized_text)
         encoded_text = base64.b64encode(recognized_text.encode()).decode()
 
