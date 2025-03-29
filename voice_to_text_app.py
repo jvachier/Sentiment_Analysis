@@ -1,4 +1,5 @@
 import os
+import sys
 import vosk
 import pyaudio
 import dash
@@ -8,18 +9,42 @@ import threading
 import base64
 import json
 import tensorflow as tf
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # from modules.model_bert_other import SentimentModel
 from modules.model import SentimentModelKeras
 
 
 class SpeechToText:
+    """
+    A class to handle speech-to-text conversion and sentiment analysis.
+
+    Attributes:
+        model (vosk.Model): The Vosk speech recognition model.
+        audio (pyaudio.PyAudio): PyAudio instance for audio input.
+        stream (pyaudio.Stream): Audio stream for recording.
+        rec (vosk.KaldiRecognizer): Vosk recognizer for speech-to-text conversion.
+        recognized_text (list): List of recognized text segments.
+        recording (bool): Flag to indicate if recording is active.
+    """
+
     def __init__(self, model_path):
+        """
+        Initialize the SpeechToText class.
+
+        Args:
+            model_path (str): Path to the Vosk model directory.
+        """
         if not os.path.exists(model_path):
-            print(
+            logging.error(
                 f"Please download a Vosk model from https://alphacephei.com/vosk/models and unpack as '{model_path}' in the current folder."
             )
-            exit(1)
+            sys.exit(1)
 
         self.model = vosk.Model(model_path)
         self.audio = pyaudio.PyAudio()
@@ -36,14 +61,25 @@ class SpeechToText:
         self.recording = False
 
     def start_recording(self):
+        """
+        Start recording audio and process it for speech-to-text conversion.
+        """
         self.recognized_text = []
         self.recording = True
         threading.Thread(target=self.record_audio).start()
+        logging.info("Recording started.")
 
     def stop_recording(self):
+        """
+        Stop recording audio.
+        """
         self.recording = False
+        logging.info("Recording stopped.")
 
     def record_audio(self):
+        """
+        Record audio from the microphone and convert it to text using Vosk.
+        """
         try:
             while self.recording:
                 data = self.stream.read(4000, exception_on_overflow=False)
@@ -53,41 +89,56 @@ class SpeechToText:
                     result = json.loads(self.rec.Result())
                     text = result.get("text", "")
                     self.recognized_text.append(text)
-                    print(f"Recognized: {text}")
+                    logging.info(f"Recognized: {text}")
         except Exception as e:
-            print(f"Error: {e}")
+            logging.error(f"Error during recording: {e}")
         finally:
             final_result = json.loads(self.rec.FinalResult())
             text = final_result.get("text", "")
             self.recognized_text.append(text)
-            print(f"Final result: {text}")
+            logging.info(f"Final result: {text}")
             with open("recognized_text.txt", "w") as text_file:
                 text_file.write("\n".join(self.recognized_text))
-            print("Text written to recognized_text.txt")
+            logging.info("Text written to recognized_text.txt")
 
     def get_recognized_text(self):
+        """
+        Get the full recognized text.
+
+        Returns:
+            str: The concatenated recognized text.
+        """
         return " ".join(self.recognized_text)
 
     def predict_sentiment(self, text):
+        """
+        Predict the sentiment of the given text using a pre-trained model.
+
+        Args:
+            text (str): The input text for sentiment analysis.
+
+        Returns:
+            str: The predicted sentiment ("Positive" or "Negative").
+        """
+        logging.info("Loading sentiment analysis model.")
         sentiment = SentimentModelKeras()
         inference_model = tf.keras.models.load_model("./models/inference_model.keras")
         raw_text_data = tf.convert_to_tensor([text])
         # Make predictions
         prediction = inference_model.predict(raw_text_data)
-        if prediction[0] > 0.51:
-            sentiment = "Positive"
-        else:
-            sentiment = "Negative"
+        sentiment = "Positive" if prediction[0] > 0.51 else "Negative"
+        logging.info(f"Predicted sentiment: {sentiment}")
         return sentiment
 
 
 # Initialize the SpeechToText class
 speech_to_text = SpeechToText(model_path="./vosk-model-en-us-0.22")
-# speech_to_text = SpeechToText(model_path="vosk-model-small-sv-rhasspy-0.15")
 
+# Initialize the Dash app
 app = dash.Dash(__name__)
 app.title = "Speech to Text Sentiment Analysis"
 
+# Define the layout of the Dash app
 app.layout = html.Div(
     style={
         "fontFamily": "Arial, sans-serif",
@@ -140,6 +191,17 @@ app.layout = html.Div(
     [State("recording-state", "data")],
 )
 def update_output(start_n_clicks, stop_n_clicks, recording_state):
+    """
+    Update the app's output based on user interactions.
+
+    Args:
+        start_n_clicks (int): Number of clicks on the "Start Recording" button.
+        stop_n_clicks (int): Number of clicks on the "Stop Recording" button.
+        recording_state (bool): Current recording state.
+
+    Returns:
+        tuple: Updated recognized text, sentiment result, download link, and recording state.
+    """
     if start_n_clicks > stop_n_clicks and not recording_state:
         speech_to_text.start_recording()
         start_n_clicks = 0
@@ -147,8 +209,6 @@ def update_output(start_n_clicks, stop_n_clicks, recording_state):
     elif stop_n_clicks > start_n_clicks and recording_state:
         speech_to_text.stop_recording()
         recognized_text = speech_to_text.get_recognized_text()
-        # if not recognized_text:
-        #     return "No speech detected", "", "", False
         sentiment = speech_to_text.predict_sentiment(text=recognized_text)
         encoded_text = base64.b64encode(recognized_text.encode()).decode()
 
@@ -159,4 +219,8 @@ def update_output(start_n_clicks, stop_n_clicks, recording_state):
 
 
 if __name__ == "__main__":
+    """
+    Entry point of the application. Starts the Dash server.
+    """
+    logging.info("Starting Dash server.")
     app.run_server(debug=True)
