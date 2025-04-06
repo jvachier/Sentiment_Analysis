@@ -38,7 +38,40 @@ class SentimentModelKeras:
         self.epochs = epochs
         self.max_token = max_token
 
-    def get_model(self) -> tf.keras.Model:
+    def get_model_api(self) -> tf.keras.Model:
+        """
+        Build and compile the sentiment analysis model.
+
+        Returns:
+            tf.keras.Model: A compiled Keras model.
+        """
+        inputs = tf.keras.Input(shape=(None,), dtype="int32")
+        embedding_layer = tf.keras.layers.Embedding(
+            input_dim=self.max_token,
+            output_dim=self.embedding_dim,
+            name="embed-layer",
+        )(inputs)
+        lstm_layer1 = tf.keras.layers.Bidirectional(
+            tf.keras.layers.LSTM(80, return_sequences=True, name="lstm-layer")
+        )(embedding_layer)
+        lstm_layer2 = tf.keras.layers.Bidirectional(
+            tf.keras.layers.LSTM(121, return_sequences=False, name="lstm-layer")
+        )(lstm_layer1)
+        dropout_layer = tf.keras.layers.Dropout(self.dropout_rate)(lstm_layer2)
+        dense_layer1 = tf.keras.layers.Dense(67, activation="gelu")(dropout_layer)
+        dense_layer2 = tf.keras.layers.Dense(75, activation="gelu")(dense_layer1)
+        dropout_layer2 = tf.keras.layers.Dropout(self.dropout_rate)(dense_layer2)
+        dense_layer3 = tf.keras.layers.Dense(32, activation="gelu")(dropout_layer2)
+        outputs = tf.keras.layers.Dense(1, activation="sigmoid")(dense_layer3)
+        model = tf.keras.Model(inputs=inputs, outputs=outputs)
+        model.compile(
+            optimizer=tf.keras.optimizers.RMSprop(learning_rate=self.learning_rate),
+            loss=tf.keras.losses.BinaryCrossentropy(),
+            metrics=["accuracy"],
+        )
+        return model
+
+    def get_model_sequential(self) -> tf.keras.Model:
         """
         Build and compile the sentiment analysis model.
 
@@ -73,9 +106,7 @@ class SentimentModelKeras:
         model.add(tf.keras.layers.Dense(32, activation="gelu"))
         model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
         model.compile(
-            optimizer=tf.keras.optimizers.legacy.RMSprop(
-                learning_rate=self.learning_rate
-            ),
+            optimizer=tf.keras.optimizers.RMSprop(learning_rate=self.learning_rate),
             loss=tf.keras.losses.BinaryCrossentropy(),
             metrics=["accuracy"],
         )
@@ -88,14 +119,18 @@ class SentimentModelKeras:
         Returns:
             dict: A dictionary containing the model's configuration.
         """
-        return {
-            "embedding_dim": self.embedding_dim,
-            "lstm_units": self.lstm_units,
-            "dropout_rate": self.dropout_rate,
-            "learning_rate": self.learning_rate,
-            "epochs": self.epochs,
-            "max_token": self.max_token,
-        }
+        config = super().get_config()
+        config.update(
+            {
+                "embedding_dim": self.embedding_dim,
+                "lstm_units": self.lstm_units,
+                "dropout_rate": self.dropout_rate,
+                "learning_rate": self.learning_rate,
+                "epochs": self.epochs,
+                "max_token": self.max_token,
+            }
+        )
+        return config
 
     def inference_model(
         self, model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
@@ -227,9 +262,7 @@ class SentimentModelKeras:
 
             learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3, log=True)
             model.compile(
-                optimizer=tf.keras.optimizers.legacy.RMSprop(
-                    learning_rate=learning_rate
-                ),
+                optimizer=tf.keras.optimizers.RMSprop(learning_rate=learning_rate),
                 loss=tf.keras.losses.BinaryCrossentropy(),
                 metrics=["accuracy"],
             )
@@ -260,3 +293,51 @@ class SentimentModelKeras:
         )
         with open("./models/optuna_model_binary.json", "w") as outfile:
             json.dump(study.best_params, outfile)
+
+
+class InferenceModel:
+    """
+    A class to create an inference model for predicting sentiment.
+    """
+
+    def __init__(
+        self, model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
+    ):
+        """
+        Initialize the InferenceModel class.
+
+        Args:
+            model (tf.keras.Model): The trained Keras model.
+            text_vec (tf.keras.layers.TextVectorization): Text vectorization layer.
+        """
+        self.model = model
+        self.text_vec = text_vec
+
+    def create_inference_model(self) -> tf.keras.Model:
+        """
+        Create an inference model for predicting sentiment.
+
+        Returns:
+            tf.keras.Model: An inference model for sentiment prediction.
+        """
+        inputs = tf.keras.Input(shape=(1,), dtype=tf.string)
+        process_inputs = self.text_vec(inputs)
+        outputs = self.model(process_inputs)
+        inference_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+        return inference_model
+
+    def get_config(self) -> dict:
+        """
+        Retrieve the configuration of the model.
+
+        Returns:
+            dict: A dictionary containing the model's configuration.
+        """
+        config = super().get_config()
+        config.update(
+            {
+                "model": self.model.get_config(),
+                "text_vec": self.text_vec.get_config(),
+            }
+        )
+        return config

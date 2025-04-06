@@ -71,3 +71,12 @@ class TextVectorizer:
         }
 
         return vectorized_dataset
+
+    def get_text_vectorization_layer(self) -> tf.keras.layers.TextVectorization:
+        """
+        Retrieve the TextVectorization layer.
+
+        Returns:
+            tf.keras.layers.TextVectorization: The TextVectorization layer.
+        """
+        return self.text_vec
