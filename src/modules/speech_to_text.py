@@ -6,7 +6,8 @@ import threading
 import json
 import tensorflow as tf
 import logging
-from modules.model import SentimentModelKeras
+# from modules.model import SentimentModelKeras
+# from modules.model import ModelBuilder, ModelTrainer
 
 
 class SpeechToText:
@@ -110,7 +111,7 @@ class SpeechToText:
             str: The predicted sentiment ("Positive" or "Negative").
         """
         logging.info("Loading sentiment analysis model.")
-        sentiment = SentimentModelKeras()
+        # sentiment = SentimentModelKeras()
         inference_model = tf.keras.models.load_model("./models/inference_model.keras")
         raw_text_data = tf.convert_to_tensor([text])
         # Make predictions

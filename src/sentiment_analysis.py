@@ -1,5 +1,6 @@
 from modules.load_data import DataLoader
-from modules.model import SentimentModelKeras
+
+from modules.model import ModelBuilder, ModelTrainer, OptunaOptimizer
 from modules.text_vecto import TextVectorizer
 import os
 import tensorflow as tf
@@ -11,6 +12,79 @@ logging.basicConfig(
 )
 
 OPTUNA = False
+
+
+def train_or_load_model(
+    train_data: tf.data.Dataset,
+    valid_data: tf.data.Dataset,
+    test_data: tf.data.Dataset,
+) -> tf.keras.Model:
+    """
+    Train the model if not already saved, otherwise load the pre-trained model.
+
+    Args:
+        train_data (tf.data.Dataset): Training dataset.
+        valid_data (tf.data.Dataset): Validation dataset.
+        test_data (tf.data.Dataset): Test dataset.
+        model_builder (ModelBuilder): Instance of the ModelBuilder class.
+
+    Returns:
+        tf.keras.Model: The trained or loaded model.
+    """
+    model_path = "./models/sentiment_keras_binary.keras"
+    if os.path.isfile(model_path):
+        logging.info("Loading the pre-trained sentiment analysis model...")
+        return tf.keras.models.load_model(model_path)
+
+    logging.info("Training the sentiment analysis model...")
+    model_builder = ModelBuilder()
+    model = model_builder.get_model_api()
+    trainer = ModelTrainer()
+    trainer.train_and_evaluate(model, train_data, valid_data, test_data)
+    return model
+
+
+def create_or_load_inference_model(
+    model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
+) -> tf.keras.Model:
+    """
+    Create and save the inference model if not already saved, otherwise load it.
+
+    Args:
+        model (tf.keras.Model): The trained model.
+        text_vec (tf.keras.layers.TextVectorization): Text vectorization layer.
+
+    Returns:
+        tf.keras.Model: The inference model.
+    """
+    inference_model_path = "./models/inference_model.keras"
+    if os.path.isfile(inference_model_path):
+        logging.info("Loading the inference model...")
+        return tf.keras.models.load_model(inference_model_path)
+
+    logging.info("Creating and saving the inference model...")
+    trainer = ModelTrainer()
+    inference_model = trainer.inference_model(model, text_vec)
+    inference_model.save(inference_model_path)
+    return inference_model
+
+
+def perform_hyperparameter_optimization(
+    train_data: tf.data.Dataset,
+    valid_data: tf.data.Dataset,
+    test_data: tf.data.Dataset,
+) -> None:
+    """
+    Perform hyperparameter optimization using Optuna.
+
+    Args:
+        train_data (tf.data.Dataset): Training dataset.
+        valid_data (tf.data.Dataset): Validation dataset.
+        test_data (tf.data.Dataset): Test dataset.
+    """
+    logging.info("Performing hyperparameter optimization using Optuna...")
+    optimiser = OptunaOptimizer()
+    optimiser.Optuna(train_data, valid_data, test_data)
 
 
 def main():
@@ -44,37 +118,27 @@ def main():
 
     # Initialize the sentiment analysis model
     logging.info("Initializing the sentiment analysis model...")
-    sentiment_keras = SentimentModelKeras()
 
     # Perform hyperparameter optimization using Optuna if enabled
     if OPTUNA and os.path.isfile("./models/optuna_model_binary.json") is False:
-        logging.info("Performing hyperparameter optimization using Optuna...")
-        sentiment_keras.Optuna(train_data, valid_data, test_data)
+        perform_hyperparameter_optimization(train_data, valid_data, test_data)
 
-    # Train the model if it is not already saved
-    if os.path.isfile("./models/sentiment_keras_binary.keras") is False:
-        logging.info("Training the sentiment analysis model...")
-        model = sentiment_keras.get_model_api()
-        sentiment_keras.train_and_evaluate(model, train_data, valid_data, test_data)
-    else:
-        logging.info("Loading the pre-trained sentiment analysis model...")
-        model = tf.keras.models.load_model("./models/sentiment_keras_binary.keras")
+    # Train or load the model
+    model = train_or_load_model(train_data, valid_data, test_data)
 
-    # Create and save the inference model if it is not already saved
-    if os.path.isfile("./models/inference_model.keras") is False:
-        logging.info("Creating and saving the inference model...")
-        inference_model = sentiment_keras.inference_model(model, text_vec)
-        inference_model.save("./models/inference_model.keras")
-    else:
-        logging.info("Loading the inference model...")
-        inference_model = tf.keras.models.load_model("./models/inference_model.keras")
+    # Create or load the inference model
+    inference_model = create_or_load_inference_model(model, text_vec)
 
     # Test the inference model with a sample input
     logging.info("Testing the inference model with a sample input...")
     raw_text_data = tf.convert_to_tensor(["I hate this hotel, it was horrible"])
     predictions = inference_model(raw_text_data)
 
-    logging.info(f"Prediction: {float(predictions[0] * 100):.2f}%")
+    prediction_percentage = float(predictions[0] * 100)
+    if prediction_percentage < 50:
+        logging.info(f"Prediction: {prediction_percentage:.2f}% - Negative Sentiment")
+    else:
+        logging.info(f"Prediction: {prediction_percentage:.2f}% - Positive Sentiment")
 
 
 if __name__ == "__main__":
