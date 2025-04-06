@@ -266,47 +266,6 @@ class ModelBuilder:
         )
         return model
 
-    def get_model_sequential(self) -> tf.keras.Model:
-        """
-        Build and compile the sentiment analysis model using the Sequential API.
-
-        Returns:
-            tf.keras.Model: A compiled Keras model.
-        """
-        model = tf.keras.Sequential()
-        model.add(tf.keras.Input(shape=(None,), dtype="int32"))
-        model.add(
-            tf.keras.layers.Embedding(
-                input_dim=self.max_token,
-                output_dim=self.embedding_dim,
-                name="embed-layer",
-            )
-        )
-        model.add(
-            tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(80, return_sequences=True, name="lstm-layer"),
-                name="bidir-lstm1",
-            )
-        )
-        model.add(
-            tf.keras.layers.Bidirectional(
-                tf.keras.layers.LSTM(121, return_sequences=False, name="lstm-layer"),
-                name="bidir-lstm2",
-            )
-        )
-        model.add(tf.keras.layers.Dropout(self.dropout_rate))
-        model.add(tf.keras.layers.Dense(67, activation="gelu"))
-        model.add(tf.keras.layers.Dense(75, activation="gelu"))
-        model.add(tf.keras.layers.Dropout(self.dropout_rate))
-        model.add(tf.keras.layers.Dense(32, activation="gelu"))
-        model.add(tf.keras.layers.Dense(1, activation="sigmoid"))
-        model.compile(
-            optimizer=tf.keras.optimizers.RMSprop(),
-            loss=tf.keras.losses.BinaryCrossentropy(),
-            metrics=["accuracy"],
-        )
-        return model
-
     def get_config(self) -> dict:
         """
         Retrieve the configuration of the model.
