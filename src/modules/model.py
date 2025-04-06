@@ -1,8 +1,9 @@
 import tensorflow as tf
-
-# from transformers import TFBertModel, BertTokenizer  # keras 2
 import optuna
 import json
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 class SentimentModelKeras:
@@ -31,6 +32,7 @@ class SentimentModelKeras:
             epochs (int): Number of training epochs.
             max_token (int): Maximum number of tokens for the embedding layer.
         """
+        super().__init__()
         self.embedding_dim = embedding_dim
         self.lstm_units = lstm_units
         self.dropout_rate = dropout_rate
@@ -179,7 +181,9 @@ class SentimentModelKeras:
             filepath="./models/sentiment_keras_binary.keras",
             save_best_only=True,
         )
-        with tf.device("/device:GPU:0"):
+        with tf.device(
+            "/device:GPU:0" if tf.config.list_physical_devices("GPU") else "/CPU:0"
+        ):
             model.fit(
                 train_data,
                 validation_data=valid_data,
@@ -187,7 +191,7 @@ class SentimentModelKeras:
                 callbacks=[early_stopping_callback, callbacks_model],
             )
             test_results = model.evaluate(test_data)
-        print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
+        logging.info("Test Accuracy: {:.2f}%".format(test_results[1] * 100))
 
     def Optuna(
         self,
@@ -293,51 +297,3 @@ class SentimentModelKeras:
         )
         with open("./models/optuna_model_binary.json", "w") as outfile:
             json.dump(study.best_params, outfile)
-
-
-class InferenceModel:
-    """
-    A class to create an inference model for predicting sentiment.
-    """
-
-    def __init__(
-        self, model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
-    ):
-        """
-        Initialize the InferenceModel class.
-
-        Args:
-            model (tf.keras.Model): The trained Keras model.
-            text_vec (tf.keras.layers.TextVectorization): Text vectorization layer.
-        """
-        self.model = model
-        self.text_vec = text_vec
-
-    def create_inference_model(self) -> tf.keras.Model:
-        """
-        Create an inference model for predicting sentiment.
-
-        Returns:
-            tf.keras.Model: An inference model for sentiment prediction.
-        """
-        inputs = tf.keras.Input(shape=(1,), dtype=tf.string)
-        process_inputs = self.text_vec(inputs)
-        outputs = self.model(process_inputs)
-        inference_model = tf.keras.Model(inputs=inputs, outputs=outputs)
-        return inference_model
-
-    def get_config(self) -> dict:
-        """
-        Retrieve the configuration of the model.
-
-        Returns:
-            dict: A dictionary containing the model's configuration.
-        """
-        config = super().get_config()
-        config.update(
-            {
-                "model": self.model.get_config(),
-                "text_vec": self.text_vec.get_config(),
-            }
-        )
-        return config
