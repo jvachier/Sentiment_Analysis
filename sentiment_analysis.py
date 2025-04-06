@@ -1,5 +1,6 @@
 from modules.load_data import DataLoader
 from modules.model import SentimentModelKeras
+from modules.text_vecto import TextVectorizer
 import os
 import tensorflow as tf
 
@@ -23,6 +24,12 @@ def main():
 
     # Initialize the TextVectorization layer and adapt it to the training data
     with tf.device("/CPU:0"):
+        # text_vectorizer = TextVectorizer(max_tokens=20000, output_sequence_length=500)
+        # text_vectorizer.adapt(ds_raw_train)
+        # vectorized_dataset = text_vectorizer.vectorize_datasets(
+        #     ds_raw_train, ds_raw_valid, ds_raw_test
+        # )
+        # train_data, valid_data, test_data = vectorized_dataset
         text_vec = tf.keras.layers.TextVectorization(
             max_tokens=20000, output_mode="int", output_sequence_length=500
         )
@@ -55,6 +62,7 @@ def main():
 
     # Create and save the inference model if it is not already saved
     if os.path.isfile("./models/inference_model.keras") is False:
+        # inference_model = sentiment_keras.inference_model(model, text_vectorizer)
         inference_model = sentiment_keras.inference_model(model, text_vec)
         inference_model.save("./models/inference_model.keras")
     else:

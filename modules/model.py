@@ -1,5 +1,6 @@
 import tensorflow as tf
-from transformers import TFBertModel, BertTokenizer  # keras 2
+
+# from transformers import TFBertModel, BertTokenizer  # keras 2
 import optuna
 import json
 
@@ -37,7 +38,7 @@ class SentimentModelKeras:
         self.epochs = epochs
         self.max_token = max_token
 
-    def get_model(self):
+    def get_model(self) -> tf.keras.Model:
         """
         Build and compile the sentiment analysis model.
 
@@ -80,7 +81,25 @@ class SentimentModelKeras:
         )
         return model
 
-    def inference_model(self, model, text_vec):
+    def get_config(self) -> dict:
+        """
+        Retrieve the configuration of the model.
+
+        Returns:
+            dict: A dictionary containing the model's configuration.
+        """
+        return {
+            "embedding_dim": self.embedding_dim,
+            "lstm_units": self.lstm_units,
+            "dropout_rate": self.dropout_rate,
+            "learning_rate": self.learning_rate,
+            "epochs": self.epochs,
+            "max_token": self.max_token,
+        }
+
+    def inference_model(
+        self, model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
+    ) -> tf.keras.Model:
         """
         Create an inference model for predicting sentiment.
 
@@ -97,7 +116,13 @@ class SentimentModelKeras:
         inference_model = tf.keras.Model(inputs=inputs, outputs=outputs)
         return inference_model
 
-    def train_and_evaluate(self, model, train_data, valid_data, test_data):
+    def train_and_evaluate(
+        self,
+        model: tf.keras.Model,
+        train_data: tf.data.Dataset,
+        valid_data: tf.data.Dataset,
+        test_data: tf.data.Dataset,
+    ) -> None:
         """
         Train and evaluate the sentiment analysis model.
 
@@ -129,7 +154,12 @@ class SentimentModelKeras:
             test_results = model.evaluate(test_data)
         print("Test Acc.: {:.2f}%".format(test_results[1] * 100))
 
-    def Optuna(self, train_data, valid_data, test_data):
+    def Optuna(
+        self,
+        train_data: tf.data.Dataset,
+        valid_data: tf.data.Dataset,
+        test_data: tf.data.Dataset,
+    ) -> None:
         """
         Perform hyperparameter optimization using Optuna.
 
