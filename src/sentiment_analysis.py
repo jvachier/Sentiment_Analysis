@@ -1,7 +1,7 @@
 from modules.load_data import DataLoader
 
 from modules.model import ModelBuilder, ModelTrainer, OptunaOptimizer
-from modules.text_vecto import TextVectorizer
+from src.modules.text_vectorizer import TextVectorizer
 import os
 import tensorflow as tf
 import logging
