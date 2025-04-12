@@ -32,6 +32,7 @@ vosk = "0.3.44"
 tensorflow = "^2.16.2"
 tensorflow-metal = "^1.2.0"
 tensorflow-macos = "^2.16.2"
+pytest = "^8.3.5"
 
 [build-system]
 requires = ["poetry-core"]
