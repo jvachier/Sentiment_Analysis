@@ -1,0 +1,8 @@
+{
+  "n_trials": 5,
+  "direction": "maximize",
+  "study_name": "sentiment_analysis_study",
+  "max_token": 20000,
+  "embedding_dim": 50,
+  "dropout_rate": 0.5
+}
