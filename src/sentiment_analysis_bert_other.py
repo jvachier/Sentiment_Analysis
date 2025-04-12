@@ -1,71 +1,44 @@
 from modules.load_data import DataLoader
-from modules.data_preprocess import TextPreprocessor
-from modules.model_bert_other import SentimentModel, SentimentModelBert
-import os
-import tensorflow as tf
-import pandas as pd
-import numpy as np
-
-BERT = False
-
-OPTUNA = False
+from modules.model_bert_other import SentimentModelBert
 
 
 def main():
+    """
+    Main function to execute the sentiment analysis pipeline.
+
+    This function performs the following steps:
+    1. Loads the dataset using the DataLoader class.
+    2. Prepares the training, validation, and test datasets for the sentiment analysis model.
+    3. Builds a BERT-based sentiment analysis model.
+    4. Trains the model and evaluates its performance on the validation and test datasets.
+
+    The dataset is expected to be located at "./data/tripadvisor_hotel_reviews.csv".
+
+    Classes and Methods Used:
+    - DataLoader: Handles loading and splitting the dataset.
+    - SentimentModelBert: Prepares data, builds the model, and handles training and evaluation.
+
+    Variables:
+    - data_loader: Instance of DataLoader to load and preprocess the dataset.
+    - ds_raw, ds_raw_train, ds_raw_valid, ds_raw_test: Raw and split datasets.
+    - target: Target column from the dataset.
+    - sentiment_model: Instance of SentimentModelBert for model-related operations.
+    - train_data, valid_data, test_data: Prepared datasets for training, validation, and testing.
+    - num_classes: Number of unique target classes in the dataset.
+    - model: The BERT-based sentiment analysis model.
+    """
     data_loader = DataLoader(data_path="./data/tripadvisor_hotel_reviews.csv")
     ds_raw, ds_raw_train, ds_raw_valid, ds_raw_test, target = data_loader.load_data()
 
-    # Sentiment with BERT
-    if BERT:
-        sentiment_model = SentimentModelBert()
-        train_data = sentiment_model.prepare_data(
-            ds_raw_train, sentiment_model.batch_size
-        )
-        valid_data = sentiment_model.prepare_data(
-            ds_raw_valid, sentiment_model.batch_size
-        )
-        test_data = sentiment_model.prepare_data(
-            ds_raw_test, sentiment_model.batch_size
-        )
+    sentiment_model = SentimentModelBert()
+    train_data = sentiment_model.prepare_data(ds_raw_train, sentiment_model.batch_size)
+    valid_data = sentiment_model.prepare_data(ds_raw_valid, sentiment_model.batch_size)
+    test_data = sentiment_model.prepare_data(ds_raw_test, sentiment_model.batch_size)
 
-        num_classes = target.nunique()
+    num_classes = target.nunique()
 
-        model = sentiment_model.build_model(num_classes)
-        sentiment_model.train_and_evaluate(model, train_data, valid_data, test_data)
-    # Sentiment without BERT
-    else:
-        text_preprocessor = TextPreprocessor()
-        token_counts = text_preprocessor.fit_tokenizer(ds_raw)
-        ds_train = ds_raw_train.map(
-            lambda text, label: text_preprocessor.encode_map_fn(text, label)
-        )
-        ds_valid = ds_raw_valid.map(
-            lambda text, label: text_preprocessor.encode_map_fn(text, label)
-        )
-        ds_test = ds_raw_test.map(
-            lambda text, label: text_preprocessor.encode_map_fn(text, label)
-        )
-
-        train_data = ds_train.padded_batch(32, padded_shapes=([-1], []))
-        valid_data = ds_valid.padded_batch(32, padded_shapes=([-1], []))
-        test_data = ds_test.padded_batch(32, padded_shapes=([-1], []))
-
-        vocab_size = len(token_counts) + 2
-        num_classes = target.nunique()
-
-        sentiment_model = SentimentModel()
-        if OPTUNA:
-            sentiment_model.Optuna(
-                vocab_size, num_classes, train_data, valid_data, test_data
-            )
-        else:
-            if os.path.isfile("./models/sentiment_binary.keras") is False:
-                model = sentiment_model.build_model(vocab_size, num_classes)
-                sentiment_model.train_and_evaluate(
-                    model, train_data, valid_data, test_data
-                )
-            else:
-                sentiment_model.evaluate(test_data)
+    model = sentiment_model.build_model(num_classes)
+    sentiment_model.train_and_evaluate(model, train_data, valid_data, test_data)
 
 
 if __name__ == "__main__":
