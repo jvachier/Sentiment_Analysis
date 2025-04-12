@@ -18,4 +18,21 @@ class ModelPaths(str, Enum):
 
     TRAINED_MODEL = Path("./models/sentiment_keras_binary.keras")
     INFERENCE_MODEL = Path("./models/inference_model.keras")
+
+
+class OptunaPaths(str, Enum):
+    """
+    Enum for Optuna-related paths.
+    """
+
+    OPTUNA_CONFIG = Path("./optuna_config.json.json")
     OPTUNA_MODEL = Path("./models/optuna_model_binary.json")
+
+
+class TextVectorizerConfig(int, Enum):
+    """
+    Enum for TextVectorizer.
+    """
+
+    max_tokens = 20000
+    output_sequence_length = 500

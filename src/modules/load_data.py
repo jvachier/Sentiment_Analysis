@@ -1,6 +1,7 @@
 import pandas as pd
 import tensorflow as tf
 from pydantic import BaseModel, FilePath, Field, ValidationError
+from modules.utils import DatasetPaths
 
 
 class DataLoaderConfig(BaseModel):
@@ -9,7 +10,7 @@ class DataLoaderConfig(BaseModel):
     """
 
     data_path: FilePath = Field(
-        default="./data/tripadvisor_hotel_reviews.csv",
+        default=DatasetPaths.RAW_DATA.value,
         description="Path to the CSV file containing the dataset.",
     )
 

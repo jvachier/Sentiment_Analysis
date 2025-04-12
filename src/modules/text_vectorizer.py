@@ -29,7 +29,7 @@ class TextVectorizer:
         text_vec (tf.keras.layers.TextVectorization): The TextVectorization layer.
     """
 
-    def __init__(self, max_tokens=20000, output_sequence_length=500):
+    def __init__(self, max_tokens, output_sequence_length):
         """
         Initialize the TextVectorizer class.
 
