@@ -1,7 +1,7 @@
 from modules.load_data import DataLoader
 
 from modules.model import ModelBuilder, ModelTrainer, OptunaOptimizer
-from src.modules.text_vectorizer import TextVectorizer
+from modules.text_vectorizer import TextVectorizer
 import os
 import tensorflow as tf
 import logging
@@ -101,7 +101,12 @@ def main():
     # Load the dataset
     logging.info("Loading the dataset...")
     data_loader = DataLoader(data_path="./data/tripadvisor_hotel_reviews.csv")
-    ds_raw, ds_raw_train, ds_raw_valid, ds_raw_test, target = data_loader.load_data()
+    datasets = data_loader.load_data()
+    ds_raw = datasets["raw"]
+    ds_raw_train = datasets["train"]
+    ds_raw_valid = datasets["valid"]
+    ds_raw_test = datasets["test"]
+    target = datasets["target"]
 
     # Initialize the TextVectorization layer and adapt it to the training data
     logging.info("Initializing and adapting the TextVectorization layer...")

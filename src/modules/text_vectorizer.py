@@ -1,4 +1,22 @@
 import tensorflow as tf
+from pydantic import BaseModel, Field, ValidationError
+
+
+class TextVectorizerConfig(BaseModel):
+    """
+    Configuration for the TextVectorizer class.
+    """
+
+    max_tokens: int = Field(
+        default=20000,
+        ge=1,  # greater than or equal to
+        description="Maximum number of tokens for the TextVectorization layer. Must be a positive integer.",
+    )
+    output_sequence_length: int = Field(
+        default=500,
+        ge=1,  # greater than or equal to
+        description="Maximum sequence length for the TextVectorization layer. Must be a positive integer.",
+    )
 
 
 class TextVectorizer:
@@ -27,7 +45,27 @@ class TextVectorizer:
             output_sequence_length=self.output_sequence_length,
         )
 
-    def adapt(self, ds_raw_train: tf.data.Dataset):
+    def __post_init__(self):
+        """
+        Post-initialization method for the TextVectorizer class.
+
+        This method is automatically called after the object is initialized. It attempts
+        to create a `TextVectorizerConfig` instance using the provided `max_tokens` and
+        `output_sequence_length` attributes. If the configuration is invalid, it raises
+        a `ValueError` with details about the validation error.
+
+        Raises:
+            ValueError: If the configuration is invalid due to a `ValidationError`.
+        """
+        try:
+            self.config = TextVectorizerConfig(
+                max_tokens=self.max_tokens,
+                output_sequence_length=self.output_sequence_length,
+            )
+        except ValidationError as e:
+            raise ValueError(f"Invalid configuration: {e}")
+
+    def adapt(self, ds_raw_train: tf.data.Dataset) -> None:
         """
         Adapt the TextVectorization layer to the training dataset.
 
