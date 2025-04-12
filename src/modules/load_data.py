@@ -1,5 +1,18 @@
 import pandas as pd
 import tensorflow as tf
+from pydantic import BaseModel, FilePath, Field, ValidationError
+from modules.utils import DatasetPaths
+
+
+class DataLoaderConfig(BaseModel):
+    """
+    Configuration for the DataLoader class.
+    """
+
+    data_path: FilePath = Field(
+        default=DatasetPaths.RAW_DATA.value,
+        description="Path to the CSV file containing the dataset.",
+    )
 
 
 class DataLoader:
@@ -10,7 +23,7 @@ class DataLoader:
         data_path (str): Path to the CSV file containing the dataset.
     """
 
-    def __init__(self, data_path):
+    def __init__(self, data_path: str):
         """
         Initialize the DataLoader class.
 
@@ -19,7 +32,16 @@ class DataLoader:
         """
         self.data_path = data_path
 
-    def load_data(self):
+    def __post_init__(self):
+        """
+        Validate the data_path using Pydantic's DataLoaderConfig.
+        """
+        try:
+            self.config = DataLoaderConfig(data_path=self.data_path)
+        except ValidationError as e:
+            raise ValueError(f"Invalid configuration: {e}")
+
+    def load_data(self) -> dict:
         """
         Load and preprocess the dataset for sentiment analysis.
 
@@ -66,4 +88,12 @@ class DataLoader:
         ds_raw_train = ds_raw_train_valid.take(int(len(ds_raw_train_valid) * 0.7))
         ds_raw_valid = ds_raw_train_valid.skip(int(len(ds_raw_train_valid) * 0.7))
 
-        return ds_raw, ds_raw_train, ds_raw_valid, ds_raw_test, target
+        data_loaded = {
+            "raw": ds_raw,
+            "train": ds_raw_train,
+            "valid": ds_raw_valid,
+            "test": ds_raw_test,
+            "target": target,
+        }
+
+        return data_loaded

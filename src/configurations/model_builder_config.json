@@ -1,0 +1,6 @@
+{
+    "lstm_units": 128,
+    "max_token": 20000,
+    "embedding_dim": 50,
+    "dropout_rate": 0.5
+}

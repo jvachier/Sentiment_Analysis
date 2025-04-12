@@ -2,6 +2,7 @@ import tensorflow as tf
 import optuna
 import json
 import logging
+from modules.utils import ModelPaths, OptunaPaths
 
 logging.basicConfig(level=logging.INFO)
 
@@ -11,7 +12,7 @@ class ModelTrainer:
     A class to train, evaluate, and optimize sentiment analysis models.
     """
 
-    def __init__(self, learning_rate=0.0008659430202504234, epochs=5):
+    def __init__(self, config_path: str):
         """
         Initialize the ModelTrainer class with hyperparameters.
 
@@ -19,8 +20,11 @@ class ModelTrainer:
             learning_rate (float): Learning rate for the optimizer.
             epochs (int): Number of training epochs.
         """
-        self.learning_rate = learning_rate
-        self.epochs = epochs
+        with open(config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        self.learning_rate = self.config["learning_rate"]
+        self.epochs = self.config["epochs"]
 
     def train_and_evaluate(
         self,
@@ -47,7 +51,7 @@ class ModelTrainer:
             restore_best_weights=True,
         )
         callbacks_model = tf.keras.callbacks.ModelCheckpoint(
-            filepath="./models/sentiment_keras_binary.keras",
+            filepath=ModelPaths.TRAINED_MODEL.value,
             save_best_only=True,
         )
         with tf.device(
@@ -87,25 +91,28 @@ class OptunaOptimizer:
     A class to perform hyperparameter optimization using Optuna.
     """
 
-    def __init__(self, max_token=20000, embedding_dim=50, dropout_rate=0.5):
+    def __init__(self, config_path: str):
         """
-        Initialize the OptunaOptimizer class with model parameters.
+        Initialize the OptunaOptimizer class with model parameters and configuration.
 
         Args:
-            max_token (int): Maximum number of tokens for the embedding layer.
-            embedding_dim (int): Dimension of the embedding layer.
-            dropout_rate (float): Dropout rate for regularization.
+            config_path (str): Path to the JSON configuration file.
         """
-        self.max_token = max_token
-        self.embedding_dim = embedding_dim
-        self.dropout_rate = dropout_rate
 
-    def Optuna(
+        # Load Optuna configuration from JSON file
+        with open(config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        # Extract embedding_dim and dropout_rate from the configuration
+        self.embedding_dim = self.config["embedding_dim"]
+        self.dropout_rate = self.config["dropout_rate"]
+        self.max_token = self.config["max_token"]
+
+    def optimize(
         self,
         train_data: tf.data.Dataset,
         valid_data: tf.data.Dataset,
         test_data: tf.data.Dataset,
-        n_trials: int = 5,
     ) -> None:
         """
         Perform hyperparameter optimization using Optuna.
@@ -114,7 +121,6 @@ class OptunaOptimizer:
             train_data (tf.data.Dataset): Training dataset.
             valid_data (tf.data.Dataset): Validation dataset.
             test_data (tf.data.Dataset): Test dataset.
-            n_trials (int): Number of trials for Optuna optimization.
         """
 
         def _objective(trial):
@@ -197,12 +203,20 @@ class OptunaOptimizer:
             score = model.evaluate(test_data, verbose=1)
             return score[1]
 
-        study = optuna.create_study(direction="maximize")
+        # Create an Optuna study
+        study = optuna.create_study(
+            direction=self.config["direction"],
+            study_name=self.config["study_name"],
+            storage=self.config["storage"],
+            load_if_exists=True,
+        )
         study.optimize(
             _objective,
-            n_trials=n_trials,
+            n_trials=self.config["n_trials"],
         )
-        with open("./models/optuna_model_binary.json", "w") as outfile:
+
+        # Save the best parameters to a JSON file
+        with open(OptunaPaths.OPTUNA_MODEL.value, "w") as outfile:
             json.dump(study.best_params, outfile)
 
 
@@ -211,13 +225,7 @@ class ModelBuilder:
     A class to define and build sentiment analysis models using Keras.
     """
 
-    def __init__(
-        self,
-        embedding_dim=50,
-        lstm_units=128,
-        dropout_rate=0.5,
-        max_token=20000,
-    ):
+    def __init__(self, config_path: str):
         """
         Initialize the ModelBuilder class with hyperparameters.
 
@@ -228,10 +236,13 @@ class ModelBuilder:
             max_token (int): Maximum number of tokens for the embedding layer.
         """
         super().__init__()
-        self.embedding_dim = embedding_dim
-        self.lstm_units = lstm_units
-        self.dropout_rate = dropout_rate
-        self.max_token = max_token
+        with open(config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        self.embedding_dim = self.config["embedding_dim"]
+        self.dropout_rate = self.config["dropout_rate"]
+        self.lstm_units = self.config["lstm_units"]
+        self.max_token = self.config["max_token"]
 
     def get_model_api(self) -> tf.keras.Model:
         """
