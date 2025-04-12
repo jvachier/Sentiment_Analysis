@@ -12,7 +12,7 @@ class ModelTrainer:
     A class to train, evaluate, and optimize sentiment analysis models.
     """
 
-    def __init__(self, learning_rate=0.0008659430202504234, epochs=5):
+    def __init__(self, config_path: str):
         """
         Initialize the ModelTrainer class with hyperparameters.
 
@@ -20,8 +20,11 @@ class ModelTrainer:
             learning_rate (float): Learning rate for the optimizer.
             epochs (int): Number of training epochs.
         """
-        self.learning_rate = learning_rate
-        self.epochs = epochs
+        with open(config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        self.learning_rate = self.config["learning_rate"]
+        self.epochs = self.config["epochs"]
 
     def train_and_evaluate(
         self,
@@ -222,13 +225,7 @@ class ModelBuilder:
     A class to define and build sentiment analysis models using Keras.
     """
 
-    def __init__(
-        self,
-        embedding_dim=50,
-        lstm_units=128,
-        dropout_rate=0.5,
-        max_token=20000,
-    ):
+    def __init__(self, config_path: str):
         """
         Initialize the ModelBuilder class with hyperparameters.
 
@@ -239,10 +236,13 @@ class ModelBuilder:
             max_token (int): Maximum number of tokens for the embedding layer.
         """
         super().__init__()
-        self.embedding_dim = embedding_dim
-        self.lstm_units = lstm_units
-        self.dropout_rate = dropout_rate
-        self.max_token = max_token
+        with open(config_path, "r") as config_file:
+            self.config = json.load(config_file)
+
+        self.embedding_dim = self.config["embedding_dim"]
+        self.dropout_rate = self.config["dropout_rate"]
+        self.lstm_units = self.config["lstm_units"]
+        self.max_token = self.config["max_token"]
 
     def get_model_api(self) -> tf.keras.Model:
         """

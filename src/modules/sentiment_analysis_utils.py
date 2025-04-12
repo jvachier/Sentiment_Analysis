@@ -33,9 +33,9 @@ def train_or_load_model(
         return tf.keras.models.load_model(model_path)
 
     logging.info("Training the sentiment analysis model.")
-    model_builder = ModelBuilder()
+    model_builder = ModelBuilder(config_path=ModelPaths.MODEL_BUILDER_CONFIG.value)
     model = model_builder.get_model_api()
-    trainer = ModelTrainer()
+    trainer = ModelTrainer(config_path=ModelPaths.MODEL_TRAINER_CONFIG.value)
     trainer.train_and_evaluate(model, train_data, valid_data, test_data)
     return model
 
@@ -78,7 +78,7 @@ def perform_hyperparameter_optimization(
         valid_data (tf.data.Dataset): Validation dataset.
         test_data (tf.data.Dataset): Test dataset.
     """
-    logging.info("Performing hyperparameter optimization using Optuna...")
+    logging.info("Performing hyperparameter optimization using Optuna.")
     optimiser = OptunaOptimizer(
         config_path=OptunaPaths.OPTUNA_CONFIG.value,
     )

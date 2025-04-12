@@ -16,6 +16,8 @@ class ModelPaths(str, Enum):
     Enum for model-related paths.
     """
 
+    MODEL_BUILDER_CONFIG = Path("./models/model_builder_config.json")
+    MODEL_TRAINER_CONFIG = Path("./models/model_trainer_config.json")
     TRAINED_MODEL = Path("./models/sentiment_keras_binary.keras")
     INFERENCE_MODEL = Path("./models/inference_model.keras")
 
