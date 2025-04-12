@@ -1,5 +1,4 @@
-import pytest
-from src.modules.model import ModelTrainer, OptunaOptimizer, ModelBuilder
+from modules.model import ModelTrainer, OptunaOptimizer, ModelBuilder
 
 
 def test_model_trainer_initialization():
