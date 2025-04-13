@@ -4,11 +4,6 @@ import os
 import tensorflow as tf
 import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
 
 def train_or_load_model(
     train_data: tf.data.Dataset,
