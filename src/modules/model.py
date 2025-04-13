@@ -4,8 +4,6 @@ import json
 import logging
 from modules.utils import ModelPaths, OptunaPaths
 
-logging.basicConfig(level=logging.INFO)
-
 
 class ModelTrainer:
     """
