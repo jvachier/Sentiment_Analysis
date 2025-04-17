@@ -3,12 +3,6 @@ import polars as pl
 # Read the Parquet file using Polars
 df = pl.read_parquet("src/data/en-fr.parquet")
 
-# Display DataFrame information
-print(
-    df.describe()
-)  # Polars does not have `info()`, but `describe()` provides summary statistics
-
-
 # Define the delimiters for splitting
 delimiters = r"|"
 
@@ -20,5 +14,14 @@ if "en" in df.columns:
 if "fr" in df.columns:
     fr_split = df.select(pl.col("fr").str.split(delimiters)).explode("fr")
 split_df = pl.concat([en_split, fr_split], how="horizontal")
+
+# Remove rows with null values
+split_df = split_df.drop_nulls()  # Drops rows with null values in any column
+
+print(
+    split_df.describe()
+)  # Polars does not have `info()`, but `describe()` provides summary statistics
+
+
 # Display the first few rows
 print(split_df.head(20))
