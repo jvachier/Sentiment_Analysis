@@ -60,7 +60,9 @@ class DatasetProcessor:
         )
 
     def shuffle_and_split(
-        self, val_split: float = 0.15, test_fraction: float = 0.1
+        self,
+        val_split: float = 0.15,
+        sample_fraction: float = 0.2,
     ) -> dict:
         """
         Shuffle and split the dataset into training, validation, and test sets.
@@ -68,13 +70,14 @@ class DatasetProcessor:
         Args:
             val_split (float): Fraction of the dataset to use for validation.
             test_fraction (float): Fraction of the dataset to use for testing purposes.
+            sample_fraction (float): Fraction of the dataset to sample for training.
 
         Returns:
             dict: A dictionary containing the training, validation, and test splits.
         """
-        # Take only a fraction of the dataset for testing purposes
-        total_samples = int(test_fraction * len(self.split_df))
-        self.split_df = self.split_df[:total_samples]
+        # Sample a fraction of the dataset
+        total_samples = int(sample_fraction * len(self.split_df))
+        self.split_df = self.split_df.sample(n=total_samples, seed=42)
 
         # Calculate the number of samples for validation and test sets
         num_val_samples = int(val_split * len(self.split_df))
@@ -164,7 +167,7 @@ class TextPreprocessor:
             fr[:, 1:],  # Target sequence for the decoder
         )
 
-    def make_dataset(self, df, batch_size: int = 64) -> tf.data.Dataset:
+    def make_dataset(self, df, batch_size: int = 256) -> tf.data.Dataset:
         """
         Create a TensorFlow dataset.
 
