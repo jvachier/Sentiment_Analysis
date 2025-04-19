@@ -61,7 +61,7 @@ def custom_standardization(input_string):
 
 
 # Define TextVectorization layers
-vocab_size = 15000
+vocab_size = 20000
 sequence_length = 20
 
 source_vectorization = tf.keras.layers.TextVectorization(
