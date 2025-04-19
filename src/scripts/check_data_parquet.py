@@ -3,7 +3,6 @@ import tensorflow as tf
 import random
 import string
 import re
-from tensorflow.keras import layers
 
 # Set a seed for reproducibility
 random.seed(42)
@@ -30,13 +29,17 @@ split_df = split_df.drop_nulls()  # Drops rows with null values in any column
 
 # Add start and end tokens to French sentences directly in Polars
 split_df = split_df.with_columns(
-    pl.col("fr").apply(lambda fr: f"[start] {fr} [end]").alias("fr")
+    pl.col("fr")
+    .map_elements(lambda fr: f"[start] {fr} [end]", return_dtype=pl.Utf8)
+    .alias("fr")
 )
 
 print("split done")
 
 # Shuffle the DataFrame
-split_df = split_df.sample(frac=1, seed=42)  # Shuffle with a seed for reproducibility
+split_df = split_df.sample(
+    shuffle=True, seed=42
+)  # Shuffle with a seed for reproducibility
 
 # Split the dataset into training, validation, and test sets
 num_val_samples = int(0.15 * len(split_df))
