@@ -53,13 +53,35 @@ class DatasetProcessor:
             .alias("fr")
         )
 
-    def shuffle_and_split(self, seed: int = 42, val_split: float = 0.15) -> dict:
-        """Shuffle and split the dataset into training, validation, and test sets."""
-        self.split_df = self.split_df.sample(shuffle=True, seed=seed)
+        # Ensure columns are strings
+        self.split_df = self.split_df.with_columns(
+            pl.col("en").cast(pl.Utf8),
+            pl.col("fr").cast(pl.Utf8),
+        )
 
+    def shuffle_and_split(
+        self, val_split: float = 0.15, test_fraction: float = 0.1
+    ) -> dict:
+        """
+        Shuffle and split the dataset into training, validation, and test sets.
+
+        Args:
+            val_split (float): Fraction of the dataset to use for validation.
+            test_fraction (float): Fraction of the dataset to use for testing purposes.
+
+        Returns:
+            dict: A dictionary containing the training, validation, and test splits.
+        """
+        # Take only a fraction of the dataset for testing purposes
+        total_samples = int(test_fraction * len(self.split_df))
+        self.split_df = self.split_df[:total_samples]
+
+        # Calculate the number of samples for validation and test sets
         num_val_samples = int(val_split * len(self.split_df))
-        num_train_samples = len(self.split_df) - 2 * num_val_samples
+        num_test_samples = num_val_samples  # Same size as validation set
+        num_train_samples = len(self.split_df) - num_val_samples - num_test_samples
 
+        # Ensure no overlap and correct slicing
         self.train_df = self.split_df[:num_train_samples]
         self.val_df = self.split_df[
             num_train_samples : num_train_samples + num_val_samples
@@ -90,9 +112,7 @@ class TextPreprocessor:
         self.sequence_length = sequence_length
 
         # Define custom standardization function
-        self.strip_chars = string.punctuation
-        self.trip_chars = self.strip_chars.replace("[", "")
-        self.strip_chars = self.strip_chars.replace("]", "")
+        self.strip_chars = string.punctuation.replace("[", "").replace("]", "")
 
         def custom_standardization(input_string):
             lowercase = tf.strings.lower(input_string)
@@ -134,8 +154,8 @@ class TextPreprocessor:
         Returns:
             tuple: A tuple containing formatted inputs and targets.
         """
-        eng = self.source_vectorization(eng)
-        fr = self.target_vectorization(fr)
+        eng = tf.cast(self.source_vectorization(eng), tf.int32)  # Ensure int32
+        fr = tf.cast(self.target_vectorization(fr), tf.int32)  # Ensure int32
         return (
             {
                 "english": eng,
@@ -157,6 +177,10 @@ class TextPreprocessor:
         """
         dataset = tf.data.Dataset.from_tensor_slices(
             (df["en"].to_list(), df["fr"].to_list())
+        )
+        dataset = dataset.map(
+            lambda en, fr: (tf.cast(en, tf.string), tf.cast(fr, tf.string)),
+            num_parallel_calls=tf.data.AUTOTUNE,
         )
         dataset = dataset.batch(batch_size)
         dataset = dataset.map(self.format_dataset, num_parallel_calls=tf.data.AUTOTUNE)

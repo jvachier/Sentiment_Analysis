@@ -1,6 +1,6 @@
 import pytest
 import polars as pl
-from scripts.data_processor import DatasetProcessor, TextPreprocessor
+from modules.data_processor import DatasetProcessor, TextPreprocessor
 
 
 @pytest.fixture
