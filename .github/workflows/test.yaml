@@ -6,13 +6,13 @@ on:
       - main
     paths:
       - "src/modules/model.py"  # Trigger only if this file is modified
-      - "src/scripts/data_processor.py"  # Trigger only if this file is modified
+      - "src/modules/data_processor.py"  # Trigger only if this file is modified
   pull_request:
     branches:
       - main
     paths:
       - "src/modules/model.py"  # Trigger only if this file is modified
-      - "src/scripts/data_processor.py"  # Trigger only if this file is modified
+      - "src/modules/data_processor.py"  # Trigger only if this file is modified
 
 jobs:
   test:
