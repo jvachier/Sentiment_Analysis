@@ -58,3 +58,6 @@ transformer.summary()
 # Train the model
 with tf.device("/GPU:0"):
     transformer.fit(train_ds, validation_data=val_ds, epochs=2)
+
+    # Evaluate the model
+    transformer.evaluate(test_ds)
