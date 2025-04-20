@@ -17,7 +17,7 @@ This repository contains a sentiment analysis application that uses TensorFlow a
 - **Training and Evaluation**: Includes functionality to train the model on a dataset and evaluate its performance on validation and test sets.
 - **Inference**: Provides an inference pipeline to predict sentiment for new text inputs.
 - **Interactive Application**: A Dash-based web application for real-time speech-to-text and sentiment analysis.
-
+- **Translation Dataset Support**: Processes English-French translation datasets for sequence-to-sequence learning.
 
 ### Install Dependencies
 
