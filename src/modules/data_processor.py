@@ -182,4 +182,4 @@ class TextPreprocessor:
         )
         dataset = dataset.batch(batch_size)
         dataset = dataset.map(self.format_dataset, num_parallel_calls=tf.data.AUTOTUNE)
-        return dataset.shuffle(2048).prefetch(tf.data.AUTOTUNE).cache()
+        return dataset.shuffle(2048).prefetch(tf.data.AUTOTUNE)
