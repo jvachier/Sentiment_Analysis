@@ -62,7 +62,6 @@ class DatasetProcessor:
     def shuffle_and_split(
         self,
         val_split: float = 0.15,
-        sample_fraction: float = 0.2,
     ) -> dict:
         """
         Shuffle and split the dataset into training, validation, and test sets.
@@ -75,14 +74,10 @@ class DatasetProcessor:
         Returns:
             dict: A dictionary containing the training, validation, and test splits.
         """
-        # Sample a fraction of the dataset
-        total_samples = int(sample_fraction * len(self.split_df))
-        self.split_df = self.split_df.sample(n=total_samples, seed=42)
 
         # Calculate the number of samples for validation and test sets
         num_val_samples = int(val_split * len(self.split_df))
-        num_test_samples = num_val_samples  # Same size as validation set
-        num_train_samples = len(self.split_df) - num_val_samples - num_test_samples
+        num_train_samples = len(self.split_df) - 2 * num_val_samples
 
         # Ensure no overlap and correct slicing
         self.train_df = self.split_df[:num_train_samples]
@@ -187,4 +182,4 @@ class TextPreprocessor:
         )
         dataset = dataset.batch(batch_size)
         dataset = dataset.map(self.format_dataset, num_parallel_calls=tf.data.AUTOTUNE)
-        return dataset.shuffle(2048).prefetch(tf.data.AUTOTUNE)
+        return dataset.shuffle(2048).prefetch(tf.data.AUTOTUNE).cache()
