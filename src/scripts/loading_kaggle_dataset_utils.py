@@ -13,19 +13,20 @@ class KaggleDatasetConfig(BaseModel):
     """
 
     dataset_name: str = Field(
-        default="dhruvildave/en-fr-translation-dataset",
-        description="The Kaggle dataset identifier (e.g., 'dhruvildave/en-fr-translation-dataset').",
+        default="devicharith/language-translation-englishfrench",
+        description="The Kaggle dataset identifier (e.g., 'devicharith/language-translation-englishfrench/data').",
     )
     file_path: str = Field(
-        default="en-fr.csv",
-        description="The file path within the Kaggle dataset to load (e.g., 'en-fr.csv').",
+        default="eng_-french.csv",
+        description="The file path within the Kaggle dataset to load (e.g., 'data.csv').",
     )
     output_path: str = Field(
         default="src/data/en-fr.parquet",
         description="The path to save the processed dataset (e.g., 'en-fr.parquet').",
     )
     required_columns: list[str] = Field(
-        default=["en", "fr"], description="The required columns in the dataset."
+        default=["English words/sentences", "French words/sentences"],
+        description="The required columns in the dataset.",
     )
 
     @validator("dataset_name")
@@ -104,14 +105,8 @@ class KaggleDatasetLoader:
         missing_columns = [
             col for col in self.config.required_columns if col not in df.columns
         ]
-        extra_columns = [
-            col for col in df.columns if col not in self.config.required_columns
-        ]
-
         if missing_columns:
             raise ValueError(f"Missing required columns: {missing_columns}")
-        if extra_columns:
-            raise ValueError(f"Unexpected columns found: {extra_columns}")
         logging.info("Column validation successful.")
 
     def optimize_and_save(self, df: pd.DataFrame) -> None:
@@ -123,6 +118,15 @@ class KaggleDatasetLoader:
         """
         logging.info("Optimizing memory usage.")
         df = self.memory_reducer.reduce(df)
+
+        # Rename columns to standardize them
+        df = df.rename(
+            columns={
+                "English words/sentences": "en",
+                "French words/sentences": "fr",
+            }
+        )
+
         logging.info(
             f"Memory optimization complete. Saving dataset to {self.config.output_path}"
         )

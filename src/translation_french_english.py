@@ -29,10 +29,10 @@ test_ds = preprocessor.make_dataset(test_df)
 
 # Define Transformer model
 embed_dim = 64  # 256
-dense_dim = 512  # 2048
+dense_dim = 2048
 num_heads = 3  # 8
 sequence_length = preprocessor.sequence_length
-vocab_size = 5000  # preprocessor.vocab_size
+vocab_size = preprocessor.vocab_size
 
 encoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="english")
 x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(encoder_inputs)
@@ -58,7 +58,9 @@ transformer.summary()
 
 # Train the model
 with tf.device("/GPU:0"):
-    transformer.fit(train_ds, validation_data=val_ds, epochs=2)
+    transformer.fit(train_ds, validation_data=val_ds, epochs=2, verbose=1)
 
     # Evaluate the model
-    transformer.evaluate(test_ds)
+    results = transformer.evaluate(test_ds)
+
+print("test loss, test acc:", results)

@@ -13,8 +13,8 @@ logging.basicConfig(
 
 # Define the configuration
 config = KaggleDatasetConfig(
-    dataset_name="dhruvildave/en-fr-translation-dataset",
-    file_path="en-fr.csv",
+    dataset_name="devicharith/language-translation-englishfrench",
+    file_path="eng_-french.csv",
     output_path="src/data/en-fr.parquet",
 )
 
