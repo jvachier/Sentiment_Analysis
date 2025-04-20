@@ -91,7 +91,7 @@ with tf.device("/GPU:0"):
     transformer.fit(
         train_ds,
         validation_data=val_ds,
-        epochs=1,  # Increased epochs for better training
+        epochs=10,  # Increased epochs for better training
         verbose=1,
         callbacks=callbacks,
     )
