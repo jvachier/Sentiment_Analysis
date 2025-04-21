@@ -3,17 +3,31 @@ import logging
 from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 
+@tf.keras.utils.register_keras_serializable(package="Custom")
 class PositionalEmbedding(tf.keras.layers.Layer):
-    def __init__(self, sequence_length, vocab_size, embed_dim):
-        super().__init__()
+    def __init__(self, sequence_length, vocab_size, embed_dim, **kwargs):
+        """
+        Initialize the PositionalEmbedding layer.
+
+        Args:
+            sequence_length (int): Maximum sequence length.
+            vocab_size (int): Vocabulary size.
+            embed_dim (int): Embedding dimension.
+            kwargs: Additional keyword arguments for the parent class.
+        """
+        super().__init__(**kwargs)
+        self.sequence_length = sequence_length
+        self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+
+    def build(self, input_shape):
         self.token_embeddings = tf.keras.layers.Embedding(
-            input_dim=vocab_size, output_dim=embed_dim
+            input_dim=self.vocab_size, output_dim=self.embed_dim
         )
         self.position_embeddings = tf.keras.layers.Embedding(
-            input_dim=sequence_length, output_dim=embed_dim
+            input_dim=self.sequence_length, output_dim=self.embed_dim
         )
-        self.sequence_length = sequence_length
-        self.embed_dim = embed_dim
+        super().build(input_shape)
 
     def call(self, inputs):
         positions = tf.range(start=0, limit=tf.shape(inputs)[-1], delta=1)
@@ -21,21 +35,39 @@ class PositionalEmbedding(tf.keras.layers.Layer):
         embedded_positions = self.position_embeddings(positions)
         return embedded_tokens + embedded_positions
 
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "sequence_length": self.sequence_length,
+                "vocab_size": self.vocab_size,
+                "embed_dim": self.embed_dim,
+            }
+        )
+        return config
 
+
+@tf.keras.utils.register_keras_serializable(package="Custom")
 class TransformerEncoder(tf.keras.layers.Layer):
-    def __init__(self, embed_dim, dense_dim, num_heads):
-        super().__init__()
+    def __init__(self, embed_dim, dense_dim, num_heads, **kwargs):
+        super().__init__(**kwargs)
+        self.embed_dim = embed_dim
+        self.dense_dim = dense_dim
+        self.num_heads = num_heads
+
+    def build(self, input_shape):
         self.attention = tf.keras.layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+            num_heads=self.num_heads, key_dim=self.embed_dim
         )
         self.dense_proj = tf.keras.Sequential(
             [
-                tf.keras.layers.Dense(dense_dim, activation="gelu"),
-                tf.keras.layers.Dense(embed_dim),
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
+                tf.keras.layers.Dense(self.embed_dim),
             ]
         )
         self.layernorm_1 = tf.keras.layers.LayerNormalization()
         self.layernorm_2 = tf.keras.layers.LayerNormalization()
+        super().build(input_shape)
 
     def call(self, inputs, mask=None):
         attention_output = self.attention(inputs, inputs, attention_mask=mask)
@@ -43,26 +75,43 @@ class TransformerEncoder(tf.keras.layers.Layer):
         proj_output = self.dense_proj(proj_input)
         return self.layernorm_2(proj_input + proj_output)
 
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "embed_dim": self.embed_dim,
+                "dense_dim": self.dense_dim,
+                "num_heads": self.num_heads,
+            }
+        )
+        return config
 
+
+@tf.keras.utils.register_keras_serializable(package="Custom")
 class TransformerDecoder(tf.keras.layers.Layer):
-    def __init__(self, embed_dim, dense_dim, num_heads):
-        super().__init__()
+    def __init__(self, embed_dim, dense_dim, num_heads, **kwargs):
+        super().__init__(**kwargs)
+        self.embed_dim = embed_dim
+        self.dense_dim = dense_dim
+        self.num_heads = num_heads
+
+    def build(self, input_shape):
         self.attention_1 = tf.keras.layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+            num_heads=self.num_heads, key_dim=self.embed_dim
         )
         self.attention_2 = tf.keras.layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+            num_heads=self.num_heads, key_dim=self.embed_dim
         )
         self.dense_proj = tf.keras.Sequential(
             [
-                tf.keras.layers.Dense(dense_dim, activation="gelu"),
-                tf.keras.layers.Dense(embed_dim),
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
+                tf.keras.layers.Dense(self.embed_dim),
             ]
         )
         self.layernorm_1 = tf.keras.layers.LayerNormalization()
         self.layernorm_2 = tf.keras.layers.LayerNormalization()
         self.layernorm_3 = tf.keras.layers.LayerNormalization()
-        self.supports_masking = True
+        super().build(input_shape)
 
     def call(self, inputs, encoder_outputs, mask=None):
         causal_mask = self.get_causal_attention_mask(inputs)
@@ -97,6 +146,17 @@ class TransformerDecoder(tf.keras.layers.Layer):
             axis=0,
         )
         return tf.tile(mask, mult)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "embed_dim": self.embed_dim,
+                "dense_dim": self.dense_dim,
+                "num_heads": self.num_heads,
+            }
+        )
+        return config
 
 
 def evaluate_bleu(model, dataset, preprocessor):

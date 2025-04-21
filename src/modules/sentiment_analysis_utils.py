@@ -1,4 +1,4 @@
-from modules.model import ModelBuilder, ModelTrainer, OptunaOptimizer
+from modules.model_sentiment_analysis import ModelBuilder, ModelTrainer, OptunaOptimizer
 from modules.utils import ModelPaths, OptunaPaths
 import os
 import tensorflow as tf

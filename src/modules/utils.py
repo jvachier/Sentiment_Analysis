@@ -19,6 +19,7 @@ class ModelPaths(str, Enum):
     MODEL_TRAINER_CONFIG = Path("src/configurations/model_trainer_config.json")
     TRAINED_MODEL = Path("src/models/sentiment_keras_binary.keras")
     INFERENCE_MODEL = Path("src/models/inference_model.keras")
+    TRANSFORMER_MODEL = Path("src/models/transformer_best_model.keras")
 
 
 class OptunaPaths(str, Enum):

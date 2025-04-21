@@ -1,14 +1,13 @@
 import logging
 from modules.data_processor import DatasetProcessor, TextPreprocessor
 from modules.transformer_components import (
-    TransformerModel,
     evaluate_bleu,
-    build_transformer,
     PositionalEmbedding,
     TransformerEncoder,
     TransformerDecoder,
 )
-
+from modules.utils import ModelPaths
+import os
 
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
@@ -41,71 +40,84 @@ def main():
     val_ds = preprocessor.make_dataset(val_df)
     test_ds = preprocessor.make_dataset(test_df)
 
-    # Define model parameters
-    embed_dim = 64
-    dense_dim = 2048
-    num_heads = 3
-    sequence_length = preprocessor.sequence_length
-    vocab_size = preprocessor.vocab_size
-
-    # Build the Transformer model
-    encoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="english")
-    x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(encoder_inputs)
-    encoder_outputs = TransformerEncoder(embed_dim, dense_dim, num_heads)(x)
-
-    decoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="french")
-    x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(decoder_inputs)
-    x = TransformerDecoder(embed_dim, dense_dim, num_heads)(x, encoder_outputs)
-    x = tf.keras.layers.Dropout(0.5)(x)
-    decoder_outputs = tf.keras.layers.Dense(vocab_size, activation="softmax")(x)
-
-    transformer = tf.keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
-
-    # Compile the model
-    transformer.compile(
-        optimizer=tf.keras.optimizers.RMSprop(),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(),
-        metrics=["accuracy"],
-    )
-
-    # Display the model summary
-    transformer.summary()
-
-    # Define callbacks
-    callbacks = [
-        ModelCheckpoint(
-            filepath="src/models/transformer_best_model.keras",
-            save_best_only=True,
-            monitor="val_loss",
-            mode="min",
-            verbose=1,
-        ),
-        EarlyStopping(
-            monitor="val_loss",
-            patience=2,
-            mode="min",
-            verbose=1,
-            restore_best_weights=True,
-        ),
-        ReduceLROnPlateau(
-            monitor="val_loss",
-            factor=0.5,
-            patience=3,
-            mode="min",
-            verbose=1,
-        ),
-    ]
-
-    # Train the model
-    logging.info("Starting model training.")
-    with tf.device("/GPU:0"):
-        transformer.fit(
-            train_ds,
-            validation_data=val_ds,
-            epochs=10,
-            verbose=1,
-            callbacks=callbacks,
+    transformer_model_path = ModelPaths.TRANSFORMER_MODEL.value
+    if os.path.isfile(transformer_model_path):
+        # Load the saved model
+        logging.info("Loading the saved Transformer model.")
+        transformer = tf.keras.models.load_model(
+            "src/models/transformer_best_model.keras",
+            custom_objects={
+                "PositionalEmbedding": PositionalEmbedding,
+                "TransformerEncoder": TransformerEncoder,
+                "TransformerDecoder": TransformerDecoder,
+            },
         )
+    else:
+        # Define model parameters
+        embed_dim = 64
+        dense_dim = 2048
+        num_heads = 3
+        sequence_length = preprocessor.sequence_length
+        vocab_size = preprocessor.vocab_size
+
+        # Build the Transformer model
+        encoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="english")
+        x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(encoder_inputs)
+        encoder_outputs = TransformerEncoder(embed_dim, dense_dim, num_heads)(x)
+
+        decoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="french")
+        x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(decoder_inputs)
+        x = TransformerDecoder(embed_dim, dense_dim, num_heads)(x, encoder_outputs)
+        x = tf.keras.layers.Dropout(0.5)(x)
+        decoder_outputs = tf.keras.layers.Dense(vocab_size, activation="softmax")(x)
+
+        transformer = tf.keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
+
+        # Compile the model
+        transformer.compile(
+            optimizer=tf.keras.optimizers.RMSprop(),
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+            metrics=["accuracy"],
+        )
+
+        # Display the model summary
+        transformer.summary()
+
+        # Define callbacks
+        callbacks = [
+            ModelCheckpoint(
+                filepath="src/models/transformer_best_model.keras",
+                save_best_only=True,
+                monitor="val_loss",
+                mode="min",
+                verbose=1,
+            ),
+            EarlyStopping(
+                monitor="val_loss",
+                patience=2,
+                mode="min",
+                verbose=1,
+                restore_best_weights=True,
+            ),
+            ReduceLROnPlateau(
+                monitor="val_loss",
+                factor=0.5,
+                patience=3,
+                mode="min",
+                verbose=1,
+            ),
+        ]
+
+        # Train the model
+        logging.info("Starting model training.")
+        with tf.device("/GPU:0"):
+            transformer.fit(
+                train_ds,
+                validation_data=val_ds,
+                epochs=10,
+                verbose=1,
+                callbacks=callbacks,
+            )
 
     # Evaluate the model
     logging.info("Evaluating the model on the test dataset.")
