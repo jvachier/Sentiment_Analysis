@@ -186,7 +186,7 @@ def main() -> None:
         preprocessor,
         input_sentence="How are you?",
     )
-    quit()
+
     # Evaluate the model
     logging.info("Evaluating the model on the test dataset.")
     results = transformer.evaluate(test_ds)
