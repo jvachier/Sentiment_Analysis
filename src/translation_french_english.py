@@ -8,6 +8,7 @@ from modules.transformer_components import (
 )
 from modules.utils import ModelPaths
 import os
+import numpy as np
 
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
@@ -53,9 +54,9 @@ def transformer_model(
             },
         )
     # Define model parameters
-    embed_dim = 64
+    embed_dim = 128
     dense_dim = 2048
-    num_heads = 3
+    num_heads = 8
     sequence_length = preprocessor.sequence_length
     vocab_size = preprocessor.vocab_size
 
@@ -120,7 +121,39 @@ def transformer_model(
     return transformer
 
 
-def main():
+def test_translation(transformer, preprocessor, input_sentence="Hello") -> None:
+    """
+    Test the Transformer model by translating an input sentence.
+
+    Args:
+        transformer (tf.keras.Model): The trained Transformer model.
+        preprocessor (TextPreprocessor): Preprocessor object for tokenization and vectorization.
+        input_sentence (str): The input sentence to translate.
+
+    Returns:
+        None
+    """
+    en_vocab = preprocessor.target_vectorization.get_vocabulary()
+    en_index_lookup = dict(zip(range(len(en_vocab)), en_vocab))
+
+    tokenized_input_sentence = preprocessor.source_vectorization([input_sentence])
+    decoded_sentence = "[start]"
+    for i in range(20):
+        tokenized_target_sentence = preprocessor.target_vectorization(
+            [decoded_sentence]
+        )[:, :-1]
+        predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
+        sampled_token_index = np.argmax(predictions[0, i, :])
+        sampled_token = en_index_lookup[sampled_token_index]
+        decoded_sentence += " " + sampled_token
+        if sampled_token == "[end]":
+            break
+
+    logging.info(f"Input Sentence: {input_sentence}")
+    logging.info(f"Translated Sentence: {decoded_sentence}")
+
+
+def main() -> None:
     logging.info("Initializing dataset processor.")
     processor = DatasetProcessor(file_path="src/data/en-fr.parquet")
     processor.load_data()
@@ -147,6 +180,13 @@ def main():
         transformer_model_path, preprocessor, train_ds, val_ds
     )
 
+    # Test the translation
+    test_translation(
+        transformer,
+        preprocessor,
+        input_sentence="How are you?",
+    )
+    quit()
     # Evaluate the model
     logging.info("Evaluating the model on the test dataset.")
     results = transformer.evaluate(test_ds)

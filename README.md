@@ -160,8 +160,8 @@ Sentiment_Analysis/
    Output:
 
    ```
-   Test loss: 2.27, Test accuracy: 65.26%
-   BLEU score on the test dataset: 0.47
+   Test loss: 1.97, Test accuracy: 67.26%
+   BLEU score on the test dataset: 0.52
    ```
 
 ---
