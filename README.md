@@ -23,6 +23,7 @@ This repository contains a sentiment analysis application and an English-to-Fren
 - **BLEU Score Evaluation**: Evaluates the quality of translations using the BLEU metric.
 - **Preprocessing**: Includes utilities for tokenizing and vectorizing English and French text.
 - **Model Saving and Loading**: Supports saving and loading trained Transformer models for reuse.
+- **Integration with Speech-to-Text**: Translates recognized speech from English to French in real-time.
 
 ---
 
@@ -83,6 +84,7 @@ Sentiment_Analysis/
 │   └── sentiment_analysis.py               # Sentiment analysis pipeline script
 │
 ├── tests/                          # Unit and integration tests
+│   ├── test_data_processor.py      # Tests for data_processor.py
 │   └── test_model.py               # Tests for speech_to_text.py
 │
 ├── .github/                        # GitHub-specific files
@@ -104,37 +106,61 @@ Sentiment_Analysis/
 
 ## Usage
 
+### Interactive Application
+
+1. **Run the Application**
+
+   Start the Dash-based web application:
+
+   ```bash
+   poetry run python app/voice_to_text_app.py
+   ```
+
+2. **User Interface**
+
+   The application provides the following features:
+   - **Start Recording**: Click the "Start Recording" button to begin recording your speech.
+   - **Stop Recording**: Click the "Stop Recording" button to stop recording.
+   - **Recognized Text**: Displays the text recognized from your speech.
+   - **Translated Text**: Displays the English-to-French translation of the recognized text.
+   - **Sentiment Analysis**: Displays the sentiment (positive or negative) of the recognized text.
+   - **Download Recognized Text**: Provides a link to download the recognized text as a `.txt` file.
+
+3. **Example Workflow**
+
+   - Click "Start Recording" and speak into your microphone.
+   - Click "Stop Recording" when you're done.
+   - The app will display:
+     - The recognized text.
+     - The French translation of the recognized text.
+     - The sentiment analysis result.
+
+---
+
 ### Sentiment Analysis
 
-1. **Prepare the Dataset**
-   
-   Place your dataset in the `src/data/` folder. The default dataset used is `tripadvisor_hotel_reviews.csv`.
+1. **Train or Load the Model**
 
-2. **Train the Model**
-
-   Run the main script to train the model:
+   Run the sentiment analysis script to train or load the model:
 
    ```bash
    poetry run python src/sentiment_analysis.py
    ```
 
-   The script will preprocess the data, train the model, and save it in the `src/models/` folder.
+   - If a saved model exists, it will be loaded.
+   - Otherwise, a new model will be trained and saved in the `src/models/` folder.
+
+2. **Evaluate the Model**
+
+   The script evaluates the model on the test dataset and with an accuracy of:
+
+   ```
+   Test Accuracy: 95.00%
+   ```
 
 3. **Inference**
 
-   The script includes a test example for inference. Modify the `raw_text_data` variable in `sentiment_analysis.py` to test with your own text input.
-
-4. **Evaluate the Model**
-
-   The script evaluates the model on the test dataset and prints the accuracy.
-
-   Output:
-
-   ```
-   Test Acc.: 95.00%
-   ```
-
----
+   Modify the `raw_text_data` variable in `src/sentiment_analysis.py` to test the model with your own text input. The script will output the predicted sentiment.
 
 ### English-to-French Translation
 

@@ -121,7 +121,7 @@ def transformer_model(
     return transformer
 
 
-def test_translation(transformer, preprocessor, input_sentence="Hello"):
+def test_translation(transformer, preprocessor, input_sentence="Hello") -> str:
     """
     Test the Transformer model by translating an input sentence.
 
