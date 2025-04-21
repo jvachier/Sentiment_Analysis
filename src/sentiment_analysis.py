@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from modules.load_data import DataLoader
 
-from modules.text_vectorizer import TextVectorizer
+from modules.text_vectorizer_sentiment_analysis import TextVectorizer
 from modules.utils import DatasetPaths, OptunaPaths, TextVectorizerConfig
 from modules.sentiment_analysis_utils import (
     train_or_load_model,
