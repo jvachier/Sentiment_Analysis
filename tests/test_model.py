@@ -1,5 +1,5 @@
 import json
-from modules.model import ModelTrainer, OptunaOptimizer, ModelBuilder
+from modules.model_sentiment_analysis import ModelTrainer, OptunaOptimizer, ModelBuilder
 from modules.utils import ModelPaths, OptunaPaths
 
 
