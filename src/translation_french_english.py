@@ -121,7 +121,7 @@ def transformer_model(
     return transformer
 
 
-def test_translation(transformer, preprocessor, input_sentence="Hello") -> None:
+def test_translation(transformer, preprocessor, input_sentence="Hello"):
     """
     Test the Transformer model by translating an input sentence.
 
@@ -131,7 +131,7 @@ def test_translation(transformer, preprocessor, input_sentence="Hello") -> None:
         input_sentence (str): The input sentence to translate.
 
     Returns:
-        None
+        str: The translated sentence.
     """
     en_vocab = preprocessor.target_vectorization.get_vocabulary()
     en_index_lookup = dict(zip(range(len(en_vocab)), en_vocab))
@@ -151,6 +151,9 @@ def test_translation(transformer, preprocessor, input_sentence="Hello") -> None:
 
     logging.info(f"Input Sentence: {input_sentence}")
     logging.info(f"Translated Sentence: {decoded_sentence}")
+
+    # Return the translated sentence without the start and end tokens
+    return decoded_sentence.replace("[start] ", "").replace(" [end]", "")
 
 
 def main() -> None:
