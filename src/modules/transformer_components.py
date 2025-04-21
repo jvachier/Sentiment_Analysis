@@ -1,4 +1,6 @@
 import tensorflow as tf
+import logging
+from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
 
 
 class PositionalEmbedding(tf.keras.layers.Layer):
@@ -95,3 +97,58 @@ class TransformerDecoder(tf.keras.layers.Layer):
             axis=0,
         )
         return tf.tile(mask, mult)
+
+
+def evaluate_bleu(model, dataset, preprocessor):
+    """
+    Evaluate the BLEU score for the model on the given dataset.
+
+    Args:
+        model (tf.keras.Model): The trained Transformer model.
+        dataset (tf.data.Dataset): The dataset to evaluate.
+        preprocessor (TextPreprocessor): The text preprocessor for decoding.
+
+    Returns:
+        float: The BLEU score for the dataset.
+    """
+    logging.info("Starting BLEU score evaluation.")
+    references = []
+    candidates = []
+    smoothing_function = SmoothingFunction().method1
+
+    # Get the vocabulary from the target vectorization layer
+    vocab = preprocessor.target_vectorization.get_vocabulary()
+    index_to_word = {i: word for i, word in enumerate(vocab)}
+
+    for batch in dataset:
+        inputs, targets = batch
+        # Generate predictions
+        predictions = model.predict(inputs, verbose=0)
+
+        # Decode predictions and targets
+        for i in range(len(predictions)):
+            # Decode predicted sentence
+            pred_tokens = predictions[i].argmax(axis=-1)  # Get token IDs
+            pred_sentence = " ".join(
+                [
+                    index_to_word[token] for token in pred_tokens if token != 0
+                ]  # Ignore padding tokens
+            )
+
+            # Decode reference sentence
+            ref_tokens = targets[i].numpy()  # Get token IDs
+            ref_sentence = " ".join(
+                [
+                    index_to_word[token] for token in ref_tokens if token != 0
+                ]  # Ignore padding tokens
+            )
+
+            candidates.append(pred_sentence)
+            references.append([ref_sentence])
+
+    # Calculate BLEU score
+    bleu_score = corpus_bleu(
+        references, candidates, smoothing_function=smoothing_function
+    )
+    logging.info(f"BLEU score evaluation completed: {bleu_score:.4f}")
+    return bleu_score
