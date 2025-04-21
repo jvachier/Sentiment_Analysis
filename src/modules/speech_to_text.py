@@ -112,7 +112,7 @@ class SpeechToText:
         """
         logging.info("Loading sentiment analysis model.")
         # sentiment = SentimentModelKeras()
-        inference_model = tf.keras.models.load_model("./models/inference_model.keras")
+        inference_model = tf.keras.models.load_model("src/models/inference_model.keras")
         raw_text_data = tf.convert_to_tensor([text])
         # Make predictions
         prediction = inference_model.predict(raw_text_data)
