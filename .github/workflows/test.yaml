@@ -7,7 +7,7 @@ on:
     paths:
       - "src/modules/model_sentiment_analysis.py"  # Trigger only if this file is modified
       - "src/modules/data_processor.py"  # Trigger only if this file is modified
-      - "src/modules/transformer_component.py"
+      - "src/modules/transformer_components.py"
       - "src/translation_french_english.py"
   pull_request:
     branches:
@@ -15,7 +15,7 @@ on:
     paths:
       - "src/modules/model_sentiment_analysis.py"  # Trigger only if this file is modified
       - "src/modules/data_processor.py"  # Trigger only if this file is modified
-      - "src/modules/transformer_component.py"
+      - "src/modules/transformer_components.py"
       - "src/translation_french_english.py"
 
 jobs:
