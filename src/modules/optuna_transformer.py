@@ -30,7 +30,7 @@ def build_transformer_model(trial, preprocessor):
         tf.keras.Model: The compiled Transformer model.
     """
     # Hyperparameters to optimize
-    embed_dim = trial.suggest_categorical("embed_dim", [64, 128, 256])
+    embed_dim = trial.suggest_categorical("embed_dim", [64, 128])
     dense_dim = trial.suggest_int("dense_dim", 512, 2048, step=512)
     num_heads = trial.suggest_categorical("num_heads", [2, 4, 8])
     dropout_rate = trial.suggest_float("dropout_rate", 0.1, 0.5, step=0.1)
@@ -110,7 +110,7 @@ def objective(trial):
         model.fit(
             train_ds,
             validation_data=val_ds,
-            epochs=5,  # Use fewer epochs for faster optimization
+            epochs=3,  # Use fewer epochs for faster optimization
             verbose=1,
             callbacks=callbacks,
         )

@@ -54,9 +54,10 @@ def transformer_model(
             },
         )
     # Define model parameters
-    embed_dim = 128
-    dense_dim = 2048
-    num_heads = 8
+    embed_dim = 64
+    dense_dim = 1536
+    num_heads = 2
+    dropout_rate = 0.4
     sequence_length = preprocessor.sequence_length
     vocab_size = preprocessor.vocab_size
 
@@ -68,7 +69,7 @@ def transformer_model(
     decoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="french")
     x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(decoder_inputs)
     x = TransformerDecoder(embed_dim, dense_dim, num_heads)(x, encoder_outputs)
-    x = tf.keras.layers.Dropout(0.5)(x)
+    x = tf.keras.layers.Dropout(dropout_rate)(x)
     decoder_outputs = tf.keras.layers.Dense(vocab_size, activation="softmax")(x)
 
     transformer = tf.keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
