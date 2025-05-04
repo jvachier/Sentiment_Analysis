@@ -7,10 +7,9 @@ from modules.transformer_components import (
     TransformerDecoder,
     evaluate_bleu,
 )
-from modules.utils import ModelPaths
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import logging
-import os
+import json
 
 # Configure logging
 logging.basicConfig(
@@ -107,13 +106,14 @@ def objective(trial):
     ]
 
     # Train the model
-    model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=5,  # Use fewer epochs for faster optimization
-        verbose=1,
-        callbacks=callbacks,
-    )
+    with tf.device("/GPU:0"):
+        model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=5,  # Use fewer epochs for faster optimization
+            verbose=1,
+            callbacks=callbacks,
+        )
 
     # Calculate BLEU score on the validation dataset
     bleu_score = evaluate_bleu(model, val_ds, preprocessor)
@@ -125,19 +125,17 @@ def main():
     Main function to run the Optuna optimization.
     """
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=5)
 
     logging.info("Best trial:")
-    logging.info(f"  Value (BLEU Score): {study.best_trial.value}")
-    logging.info("  Params:")
+    logging.info(f"Value (BLEU Score): {study.best_trial.value}")
+    logging.info("Params:")
     for key, value in study.best_trial.params.items():
         logging.info(f"    {key}: {value}")
 
     # Save the best hyperparameters
     best_params = study.best_trial.params
-    with open("src/models/optuna_best_params.json", "w") as f:
-        import json
-
+    with open("src/models/optuna_transformer_best_params.json", "w") as f:
         json.dump(best_params, f, indent=4)
 
 
