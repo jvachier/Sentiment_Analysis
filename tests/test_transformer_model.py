@@ -15,21 +15,27 @@ import os
 @pytest.fixture
 def setup_data():
     """
-    Fixture to set up a smaller dataset and preprocessor for testing.
+    Fixture to set up a mocked dataset and preprocessor for testing.
     """
-    processor = DatasetProcessor(file_path="src/data/en-fr.parquet")
-    processor.load_data()
-    processor.process_data()
-    data_splits = processor.shuffle_and_split()
-    train_df = data_splits["train"].sample(n=100)  # Use only 100 samples for training
-    val_df = data_splits["validation"].sample(
-        n=50
-    )  # Use only 50 samples for validation
-    test_df = data_splits["test"].sample(n=50)  # Use only 50 samples for testing
+    import pandas as pd
 
+    # Create a small mock dataset
+    mock_data = {
+        "en": ["hello", "how are you", "good morning", "thank you", "goodbye"],
+        "fr": ["bonjour", "comment ça va", "bon matin", "merci", "au revoir"],
+    }
+    mock_df = pd.DataFrame(mock_data)
+
+    # Split the mock dataset
+    train_df = mock_df.sample(frac=0.6, random_state=42)
+    val_df = mock_df.drop(train_df.index).sample(frac=0.5, random_state=42)
+    test_df = mock_df.drop(train_df.index).drop(val_df.index)
+
+    # Initialize the preprocessor
     preprocessor = TextPreprocessor()
     preprocessor.adapt(train_df)
 
+    # Create TensorFlow datasets
     train_ds = preprocessor.make_dataset(train_df)
     val_ds = preprocessor.make_dataset(val_df)
     test_ds = preprocessor.make_dataset(test_df)
