@@ -40,16 +40,26 @@ def build_transformer_model(trial, preprocessor):
 
     # Build the Transformer model
     encoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="english")
-    x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(encoder_inputs)
-    encoder_outputs = TransformerEncoder(embed_dim, dense_dim, num_heads)(x)
+    encoder_embeddings = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(
+        encoder_inputs
+    )
+    encoder_outputs = TransformerEncoder(embed_dim, dense_dim, num_heads)(
+        encoder_embeddings
+    )
 
     decoder_inputs = tf.keras.Input(shape=(None,), dtype="int32", name="french")
-    x = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(decoder_inputs)
-    x = TransformerDecoder(embed_dim, dense_dim, num_heads)(x, encoder_outputs)
-    x = tf.keras.layers.Dropout(dropout_rate)(x)
-    decoder_outputs = tf.keras.layers.Dense(vocab_size, activation="softmax")(x)
+    decoder_embeddings = PositionalEmbedding(sequence_length, vocab_size, embed_dim)(
+        decoder_inputs
+    )
+    decoder_outputs = TransformerDecoder(embed_dim, dense_dim, num_heads)(
+        decoder_embeddings, encoder_outputs
+    )
+    dropout_outputs = tf.keras.layers.Dropout(dropout_rate)(decoder_outputs)
+    final_outputs = tf.keras.layers.Dense(vocab_size, activation="softmax")(
+        dropout_outputs
+    )
 
-    transformer = tf.keras.Model([encoder_inputs, decoder_inputs], decoder_outputs)
+    transformer = tf.keras.Model([encoder_inputs, decoder_inputs], final_outputs)
 
     # Compile the model
     transformer.compile(
@@ -106,7 +116,8 @@ def objective(trial):
     ]
 
     # Train the model
-    with tf.device("/GPU:0"):
+    device = "/GPU:0" if tf.config.list_physical_devices("GPU") else "/CPU:0"
+    with tf.device(device):
         model.fit(
             train_ds,
             validation_data=val_ds,
