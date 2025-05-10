@@ -60,6 +60,24 @@ This repository provides a comprehensive solution for real-time **speech-to-text
 
 ---
 
+## Required Datasets
+
+### 1. Sentiment Analysis Dataset
+- **Dataset**: [TripAdvisor Hotel Reviews Dataset](https://www.kaggle.com/datasets/andrewmvd/trip-advisor-hotel-reviews)
+- **Description**: Hotels play a crucial role in traveling, and with increased access to information, new pathways for selecting the best ones have emerged. This dataset consists of 20,000 reviews crawled from TripAdvisor, allowing you to explore what makes a great hotel and potentially use this model in your travels.
+- **Setup**:
+   - Download the dataset from the link above.
+   - Place the dataset in the `src/data/` directory.
+
+### 2. English-to-French Translation Dataset
+- **Dataset**: [English-French Dataset (Kaggle)](https://www.kaggle.com/datasets/dhruvildave/en-fr-translations)
+- **Description**: This dataset contains English sentences paired with their French translations. It is used to train and evaluate the Transformer-based translation model.
+- **Setup**:
+  - Download the dataset from the link above.
+  - Place the dataset in the `src/data/` directory as `en-fr.parquet`.
+
+---
+
 ## Project Structure
 
 ```
@@ -101,10 +119,7 @@ Sentiment_Analysis/
 │   ├── test_data_processor.py      # Tests for data_processor.py
 │   └── test_model.py               # Tests for speech_to_text.py
 │
-├── .github/      │   ├── test_data_processor.py      # Tests for data_processor.py
-│   └── test_model.py               # Tests for speech_to_text.py
-│
-# GitHub-specific files
+├── .github/                        # GitHub-specific files
 │   ├── workflows/                  # GitHub Actions workflows
 │   ├── AUTHORS.md                  # List of authors
 │   ├── CODEOWNERS                  # Code owners for the repository
