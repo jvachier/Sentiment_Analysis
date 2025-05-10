@@ -62,6 +62,8 @@ class TransformerEncoder(tf.keras.layers.Layer):
         self.dense_proj = tf.keras.Sequential(
             [
                 tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
                 tf.keras.layers.Dense(self.embed_dim),
             ]
         )
@@ -104,6 +106,8 @@ class TransformerDecoder(tf.keras.layers.Layer):
         )
         self.dense_proj = tf.keras.Sequential(
             [
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
+                tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
                 tf.keras.layers.Dense(self.dense_dim, activation="gelu"),
                 tf.keras.layers.Dense(self.embed_dim),
             ]
