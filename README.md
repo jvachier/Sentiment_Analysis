@@ -79,14 +79,14 @@ The sentiment analysis and translation models included in this repository are **
 ## Required Datasets
 
 ### 1. Sentiment Analysis Dataset
-- **Dataset**: [TripAdvisor Hotel Reviews Dataset](https://www.kaggle.com/datasets/andrewmvd/trip-advisor-hotel-reviews)
+- **Dataset**: [TripAdvisor Hotel Reviews Dataset (Kaggle)](https://www.kaggle.com/datasets/andrewmvd/trip-advisor-hotel-reviews)
 - **Description**: This dataset consists of 20,000 reviews crawled from TripAdvisor, allowing you to explore what makes a great hotel and potentially use this model in your travels.
 - **Setup**:
    - Download the dataset from the link above.
    - Place the dataset in the `src/data/` directory.
 
 ### 2. English-to-French Translation Dataset
-- **Dataset**: [English-French Dataset (Kaggle)](https://www.kaggle.com/datasets/dhruvildave/en-fr-translations)
+- **Dataset**: [English-French Dataset (Kaggle)](https://www.kaggle.com/datasets/devicharith/language-translation-englishfrench)
 - **Description**: This dataset contains English sentences paired with their French translations. It is used to train and evaluate the Transformer-based translation model.
 - **Setup**:
   - Download the dataset from the link above.
