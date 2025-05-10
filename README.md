@@ -6,7 +6,9 @@
 
 # Sentiment Analysis and Translation
 
-This repository contains a sentiment analysis application and an English-to-French translation model. The sentiment analysis application uses TensorFlow and Keras to classify text data into positive or negative sentiments. The translation model implements a Transformer-based architecture for sequence-to-sequence learning.
+This repository provides a comprehensive solution for real-time **speech-to-text**, **sentiment analysis**, and **English-to-French translation** using state-of-the-art machine learning techniques. It includes an interactive web application and robust pipelines for text processing, sentiment classification, and language translation.
+
+---
 
 ## Features
 
@@ -29,19 +31,32 @@ This repository contains a sentiment analysis application and an English-to-Fren
 
 ## Installation
 
+### Prerequisites
+- Python 3.8 or higher
+- Poetry for dependency management
+
 ### Install Dependencies
+1. Install Poetry:
+   ```bash
+   pip install poetry
+   ```
+2. Install project dependencies:
+   ```bash
+   poetry install
+   ```
 
-Install Poetry if you haven't already:
-
-```bash
-pip install poetry
-```
-
-Then, install the project dependencies:
-
-```bash
-poetry install
-```
+### Download the Vosk Model
+1. Download the `vosk-model-en-us-0.22` model from the [official Vosk repository](https://alphacephei.com/vosk/models).
+2. Extract the `.zip` file into the project directory:
+   ```bash
+   unzip vosk-model-en-us-0.22.zip -d vosk-model-en-us-0.22
+   ```
+3. Ensure the extracted folder is located in the root directory:
+   ```
+   Sentiment_Analysis/
+   ├── vosk-model-en-us-0.22/
+   └── ...
+   ```
 
 ---
 
@@ -52,7 +67,6 @@ Sentiment_Analysis/
 ├── app/                            # Application-specific files
 │   ├── __init__.py                 # Makes the folder a Python package
 │   └── voice_to_text_app.py        # Main application script
-│
 ├── src/                            # Source folder
 │   ├── data/                       # Dataset folder
 │   ├── models/                     # Saved models
@@ -87,7 +101,10 @@ Sentiment_Analysis/
 │   ├── test_data_processor.py      # Tests for data_processor.py
 │   └── test_model.py               # Tests for speech_to_text.py
 │
-├── .github/                        # GitHub-specific files
+├── .github/      │   ├── test_data_processor.py      # Tests for data_processor.py
+│   └── test_model.py               # Tests for speech_to_text.py
+│
+# GitHub-specific files
 │   ├── workflows/                  # GitHub Actions workflows
 │   ├── AUTHORS.md                  # List of authors
 │   ├── CODEOWNERS                  # Code owners for the repository
@@ -107,84 +124,42 @@ Sentiment_Analysis/
 ## Usage
 
 ### Interactive Application
-
-1. **Run the Application**
-
-   Start the Dash-based web application:
-
+1. **Run the Application**:
    ```bash
    poetry run python app/voice_to_text_app.py
    ```
-
-2. **User Interface**
-
-   The application provides the following features:
-   - **Start Recording**: Click the "Start Recording" button to begin recording your speech.
-   - **Stop Recording**: Click the "Stop Recording" button to stop recording.
+2. **Features**:
+   - **Start Recording**: Begin recording your speech.
+   - **Stop Recording**: Stop recording.
    - **Recognized Text**: Displays the text recognized from your speech.
    - **Translated Text**: Displays the English-to-French translation of the recognized text.
    - **Sentiment Analysis**: Displays the sentiment (positive or negative) of the recognized text.
    - **Download Recognized Text**: Provides a link to download the recognized text as a `.txt` file.
 
-3. **Example Workflow**
-
-   - Click "Start Recording" and speak into your microphone.
-   - Click "Stop Recording" when you're done.
-   - The app will display:
-     - The recognized text.
-     - The French translation of the recognized text.
-     - The sentiment analysis result.
-
----
-
 ### Sentiment Analysis
-
-1. **Train or Load the Model**
-
-   Run the sentiment analysis script to train or load the model:
-
+1. **Train or Load the Model**:
    ```bash
    poetry run python src/sentiment_analysis.py
    ```
-
    - If a saved model exists, it will be loaded.
    - Otherwise, a new model will be trained and saved in the `src/models/` folder.
-
-2. **Evaluate the Model**
-
-   The script evaluates the model on the test dataset and with an accuracy of:
-
+2. **Evaluate the Model**:
+   The script evaluates the model on the test dataset:
    ```
    Test Accuracy: 95.00%
    ```
 
-3. **Inference**
-
-   Modify the `raw_text_data` variable in `src/sentiment_analysis.py` to test the model with your own text input. The script will output the predicted sentiment.
-
 ### English-to-French Translation
-
-1. **Prepare the Dataset**
-
-   Place your English-French dataset in the `src/data/` folder. The dataset should be in a format compatible with the `DatasetProcessor` class.
-
-2. **Train or Load the Model**
-
-   Run the translation script to train or load the Transformer model:
-
+1. **Prepare the Dataset**:
+   Place your English-French dataset in the `src/data/` folder.
+2. **Train or Load the Model**:
    ```bash
    poetry run python src/translation_french_english.py
    ```
-
    - If a saved model exists, it will be loaded.
    - Otherwise, a new model will be trained and saved in the `src/models/` folder.
-
-3. **Evaluate the Model**
-
-   The script evaluates the model on the test dataset and calculates the BLEU score.
-
-   Output:
-
+3. **Evaluate the Model**:
+   The script evaluates the model on the test dataset and calculates the BLEU score:
    ```
    Test loss: 1.97, Test accuracy: 67.26%
    BLEU score on the test dataset: 0.52
@@ -201,4 +176,12 @@ Sentiment_Analysis/
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## About
+
+This repository is designed for researchers, developers, and enthusiasts interested in exploring advanced NLP techniques. It provides a practical implementation of speech-to-text, sentiment analysis, and translation pipelines, along with an interactive web application.
+
+For questions or feedback, feel free to open an issue or contact the repository maintainers.
