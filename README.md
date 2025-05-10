@@ -11,6 +11,15 @@ This repository provides a comprehensive solution for real-time **speech-to-text
 
 ---
 
+## Overview
+
+![Application Workflow](docs/images/app_workflow.png)
+
+*Figure: High-level workflow of the application, including speech-to-text, sentiment analysis, and translation.*
+
+
+---
+
 ## Features
 
 ### Sentiment Analysis
@@ -27,6 +36,12 @@ This repository provides a comprehensive solution for real-time **speech-to-text
 - **Preprocessing**: Includes utilities for tokenizing and vectorizing English and French text.
 - **Model Saving and Loading**: Supports saving and loading trained Transformer models for reuse.
 - **Integration with Speech-to-Text**: Translates recognized speech from English to French in real-time.
+
+---
+
+## Note on Models
+
+The sentiment analysis and translation models included in this repository are **toy models** designed for demonstration purposes. They may not achieve production-level accuracy and are intended for educational and exploratory use.
 
 ---
 
@@ -65,7 +80,7 @@ This repository provides a comprehensive solution for real-time **speech-to-text
 
 ### 1. Sentiment Analysis Dataset
 - **Dataset**: [TripAdvisor Hotel Reviews Dataset](https://www.kaggle.com/datasets/andrewmvd/trip-advisor-hotel-reviews)
-- **Description**: Hotels play a crucial role in traveling, and with increased access to information, new pathways for selecting the best ones have emerged. This dataset consists of 20,000 reviews crawled from TripAdvisor, allowing you to explore what makes a great hotel and potentially use this model in your travels.
+- **Description**: This dataset consists of 20,000 reviews crawled from TripAdvisor, allowing you to explore what makes a great hotel and potentially use this model in your travels.
 - **Setup**:
    - Download the dataset from the link above.
    - Place the dataset in the `src/data/` directory.
@@ -177,7 +192,7 @@ Sentiment_Analysis/
 3. **Evaluate the Model**:
    The script evaluates the model on the test dataset and calculates the BLEU score:
    ```
-   Test loss: 1.97, Test accuracy: 67.26%
+   Test loss: 2.13, Test accuracy: 67.26%
    BLEU score on the test dataset: 0.52
    ```
 
