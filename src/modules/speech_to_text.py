@@ -6,8 +6,6 @@ import threading
 import json
 import tensorflow as tf
 import logging
-# from modules.model import SentimentModelKeras
-# from modules.model import ModelBuilder, ModelTrainer
 
 
 class SpeechToText:
