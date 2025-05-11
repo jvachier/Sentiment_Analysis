@@ -108,8 +108,8 @@ Sentiment_Analysis/
 │   │   ├── inference_model.keras
 │   │   ├── sentiment_keras_binary.keras
 │   │   ├── transformer_best_model.keras
-│   │   ├── optuna_model_binary.json
-│   │   └── optuna_transformer_best_params.json 
+│   │   ├── optuna_model_binary.json               # Best binary classification model parameters from Optuna
+│   │   └── optuna_transformer_best_params.json    # Best transformer model hyperparameters from Optuna 
 │   ├── configurations/             # Configuration files
 │   │   ├── model_builder_config.json
 │   │   ├── model_trainer_config.json
