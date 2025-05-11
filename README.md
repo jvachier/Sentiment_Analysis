@@ -107,21 +107,26 @@ Sentiment_Analysis/
 │   │   ├── inference_model.keras
 │   │   ├── sentiment_keras_binary.keras
 │   │   ├── transformer_best_model.keras
-│   │   └── optuna_model_binary.json # Hyperparameter optimization results
+│   │   ├── optuna_model_binary.json
+│   │   └── optuna_transformer_best_params.json 
 │   ├── configurations/             # Configuration files
 │   │   ├── model_builder_config.json
 │   │   ├── model_trainer_config.json
 │   │   └── optuna_config.json
-│   ├── modules/                        # Custom Python modules
-│   │   ├── __init__.py                 # Makes the folder a Python package
-│   │   ├── load_data.py                # Data loading utilities
-│   │   ├── model.py                    # Model definition and training
-│   │   ├── data_preprocess.py          # Data preprocessing utilities
-│   │   ├── text_vectorizer.py          # Text vectorization utilities
-│   │   ├── utils.py                    # Enum classes
-│   │   ├── sentiment_analysis_utils.py # Utils functions for sentiment_analysis
-│   │   ├── transformer_components.py   # Transformer model components
-│   │   └── speech_to_text.py           # Speech-to-text and sentiment analysis logic
+│   ├── modules/                                   # Custom Python modules
+│   │   ├── __init__.py                            # Makes the folder a Python package
+│   │   ├── data_processor.py                      # Data loading and preprocessing utilities
+│   │   ├── transformer_components.py              # Transformer model components
+│   │   ├── speech_to_text.py                      # Speech-to-text and sentiment analysis logic
+│   │   ├── text_vectorizer_sentiment_analysis.py  # Text vectorization for sentiment analysis
+│   │   ├── load_data.py                           # Data loading utilities
+│   │   ├── model_bert_other.py                    # BERT-based sentiment analysis model
+│   │   ├── sentiment_analysis_utils.py            # Utilities for sentiment analysis
+│   │   ├── optuna_transformer.py                  # Optuna-based hyperparameter optimization
+│   │   ├── utils.py                               # Utility functions and enums
+│   │   ├── mem_reduction.py                       # Memory optimization utilities
+│   │   ├── data_preprocess_nltk.py                # NLTK-based text preprocessing
+│   │   └── text_vectorizer.py                     # Text vectorization utilities
 │   ├── scripts/                                # Scripts for dataset management and preprocessing
 │   │   ├── __init__.py                         # Marks the directory as a Python package
 │   │   ├── loading_kaggle_dataset_utils.py     # Utilities for downloading and optimizing Kaggle datasets
@@ -130,13 +135,12 @@ Sentiment_Analysis/
 │   ├── translation_french_english.py       # English-to-French translation pipeline
 │   ├── sentiment_analysis_bert_other.py    # Sentiment analysis using BERT
 │   └── sentiment_analysis.py               # Sentiment analysis pipeline script
-│
 ├── tests/                          # Unit and integration tests
 │   ├── test_data_processor.py      # Tests for data_processor.py
 │   └── test_model.py               # Tests for speech_to_text.py
-│
 ├── .github/                        # GitHub-specific files
 │   ├── workflows/                  # GitHub Actions workflows
+│   │   └── test.yaml               # Workflow for running tests
 │   ├── AUTHORS.md                  # List of authors
 │   ├── CODEOWNERS                  # Code owners for the repository
 │   ├── CONTRIBUTORS.md             # List of contributors
