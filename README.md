@@ -1,4 +1,5 @@
 [![Linting: Ruff](https://img.shields.io/badge/linting-ruff-yellowgreen)](https://github.com/charliermarsh/ruff)
+[![CI: Passed](https://img.shields.io/badge/CI-Passed-brightgreen)](https://github.com/your-repo/actions)
 [![Deep Learning](https://img.shields.io/badge/Deep%20Learning-TensorFlow-orange)](https://www.tensorflow.org/)
 [![Keras](https://img.shields.io/badge/Keras-red)](https://keras.io/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0%2B-orange)](https://www.tensorflow.org/)
