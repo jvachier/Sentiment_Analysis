@@ -21,7 +21,7 @@ logging.basicConfig(
 
 
 def transformer_model(
-    transformer_model_path,
+    transformer_model_path: str,
     preprocessor: TextPreprocessor,
     train_ds: tf.data.Dataset,
     val_ds: tf.data.Dataset,
@@ -134,7 +134,11 @@ def transformer_model(
     return transformer
 
 
-def test_translation(transformer, preprocessor, input_sentence="Hello") -> str:
+def test_translation(
+    transformer: tf.keras.Model,
+    preprocessor: TextPreprocessor,
+    input_sentence: str = "Hello",
+) -> str:
     """
     Test the Transformer model by translating an input sentence.
 
