@@ -1,7 +1,5 @@
 import tensorflow as tf
 from transformers import TFBertModel, BertTokenizer
-import optuna
-import json
 
 
 class SentimentModelBert:

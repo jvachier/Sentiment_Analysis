@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 
 
-def main():
+def main() -> None:
     """
     Main function to execute the sentiment analysis pipeline.
 
