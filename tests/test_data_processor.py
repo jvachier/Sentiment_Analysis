@@ -1,5 +1,6 @@
 import pytest
 import polars as pl
+import tensorflow as tf
 from typing import Dict, Any
 from modules.data_processor import DatasetProcessor, TextPreprocessor
 
@@ -82,7 +83,7 @@ def test_text_preprocessor(sample_data: pl.DataFrame) -> None:
     preprocessor.adapt(train_df)
 
     # Check if vectorization works
-    train_ds: Any = preprocessor.make_dataset(train_df)
+    train_ds: tf.data.Dataset = preprocessor.make_dataset(train_df)
     for inputs, targets in train_ds.take(1):
         assert inputs["english"].shape[0] > 0, "English input is empty!"
         assert inputs["french"].shape[0] > 0, "French input is empty!"
