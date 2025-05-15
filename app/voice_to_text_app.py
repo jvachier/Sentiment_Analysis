@@ -7,7 +7,7 @@ from modules.speech_to_text import SpeechToText
 from translation_french_english import test_translation, transformer_model
 from modules.data_processor import DatasetProcessor, TextPreprocessor
 from modules.utils import ModelPaths
-import tensorflow as tf
+from typing import Tuple, Any
 
 # Configure logging
 logging.basicConfig(
@@ -108,7 +108,9 @@ app.layout = html.Div(
     [Input("start-record-button", "n_clicks"), Input("stop-record-button", "n_clicks")],
     [State("recording-state", "data")],
 )
-def update_output(start_n_clicks, stop_n_clicks, recording_state):
+def update_output(
+    start_n_clicks: int, stop_n_clicks: int, recording_state: bool
+) -> Tuple[Any, Any, Any, Any, bool]:
     """
     Update the app's output based on user interactions.
 

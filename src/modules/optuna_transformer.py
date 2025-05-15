@@ -18,7 +18,9 @@ logging.basicConfig(
 )
 
 
-def build_transformer_model(trial, preprocessor):
+def build_transformer_model(
+    trial: optuna.trial.Trial, preprocessor: TextPreprocessor
+) -> tf.keras.Model:
     """
     Build a Transformer model with hyperparameters suggested by Optuna.
 
@@ -71,7 +73,7 @@ def build_transformer_model(trial, preprocessor):
     return transformer
 
 
-def objective(trial):
+def objective(trial: optuna.trial.Trial) -> float:
     """
     Objective function for Optuna to optimize the Transformer model using BLEU score.
 
@@ -131,7 +133,7 @@ def objective(trial):
     return bleu_score
 
 
-def main():
+def main() -> None:
     """
     Main function to run the Optuna optimization.
     """

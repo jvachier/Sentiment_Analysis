@@ -1,8 +1,8 @@
 import polars as pl
 import tensorflow as tf
-import random
 import string
 import re
+from typing import Tuple, Dict
 
 
 class DatasetProcessor:
@@ -62,7 +62,7 @@ class DatasetProcessor:
     def shuffle_and_split(
         self,
         val_split: float = 0.15,
-    ) -> dict:
+    ) -> Dict[str, pl.DataFrame]:
         """
         Shuffle and split the dataset into training, validation, and test sets.
 
@@ -131,7 +131,7 @@ class TextPreprocessor:
             standardize=custom_standardization,
         )
 
-    def adapt(self, train_df) -> None:
+    def adapt(self, train_df: pl.DataFrame) -> None:
         """
         Adapt the vectorization layers to the training data.
 
@@ -141,7 +141,9 @@ class TextPreprocessor:
         self.source_vectorization.adapt(train_df["en"].to_list())
         self.target_vectorization.adapt(train_df["fr"].to_list())
 
-    def format_dataset(self, eng, fr) -> tuple:
+    def format_dataset(
+        self, eng: tf.Tensor, fr: tf.Tensor
+    ) -> Tuple[Dict[str, tf.Tensor], tf.Tensor]:
         """
         Format the dataset for training.
 

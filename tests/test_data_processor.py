@@ -1,29 +1,40 @@
 import pytest
 import polars as pl
 import tensorflow as tf
+from typing import Dict, Any
 from modules.data_processor import DatasetProcessor, TextPreprocessor
 
 
 @pytest.fixture
-def sample_data():
-    """Fixture to create a sample dataset."""
-    data = {
+def sample_data() -> pl.DataFrame:
+    """
+    Fixture to create a sample dataset.
+
+    Returns:
+        pl.DataFrame: A sample dataset with English and French text.
+    """
+    data: Dict[str, list[str]] = {
         "en": ["Hello|Hi", "Goodbye|Bye"],
         "fr": ["Bonjour|Salut", "Au revoir|Adieu"],
     }
     return pl.DataFrame(data)
 
 
-def test_dataset_processor(sample_data):
-    """Test the DatasetProcessor class."""
+def test_dataset_processor(sample_data: pl.DataFrame) -> None:
+    """
+    Test the DatasetProcessor class.
+
+    Args:
+        sample_data (pl.DataFrame): A sample dataset fixture.
+    """
     # Save sample data to a temporary Parquet file
     sample_data.write_parquet("test_data.parquet")
 
     # Initialize and process the data
-    processor = DatasetProcessor("test_data.parquet")
+    processor: DatasetProcessor = DatasetProcessor("test_data.parquet")
     processor.load_data()
     processor.process_data()
-    data_splits = processor.shuffle_and_split()
+    data_splits: Dict[str, pl.DataFrame] = processor.shuffle_and_split()
 
     # Check if the data is processed correctly
     assert len(processor.split_df) > 0, "Processed dataset is empty!"
@@ -31,7 +42,7 @@ def test_dataset_processor(sample_data):
     assert processor.split_df["fr"][0].startswith("[start]"), "Start token missing!"
 
     # Check if the splits are correct
-    total_rows = len(processor.split_df)
+    total_rows: int = len(processor.split_df)
     assert (
         len(data_splits["train"])
         + len(data_splits["validation"])
@@ -50,24 +61,29 @@ def test_dataset_processor(sample_data):
     os.remove("test_data.parquet")
 
 
-def test_text_preprocessor(sample_data):
-    """Test the TextPreprocessor class."""
+def test_text_preprocessor(sample_data: pl.DataFrame) -> None:
+    """
+    Test the TextPreprocessor class.
+
+    Args:
+        sample_data (pl.DataFrame): A sample dataset fixture.
+    """
     # Save sample data to a temporary Parquet file
     sample_data.write_parquet("test_data.parquet")
 
     # Initialize and process the data
-    processor = DatasetProcessor("test_data.parquet")
+    processor: DatasetProcessor = DatasetProcessor("test_data.parquet")
     processor.load_data()
     processor.process_data()
-    data_splits = processor.shuffle_and_split()
-    train_df = data_splits["train"]
+    data_splits: Dict[str, pl.DataFrame] = processor.shuffle_and_split()
+    train_df: pl.DataFrame = data_splits["train"]
 
     # Initialize the TextPreprocessor
-    preprocessor = TextPreprocessor()
+    preprocessor: TextPreprocessor = TextPreprocessor()
     preprocessor.adapt(train_df)
 
     # Check if vectorization works
-    train_ds = preprocessor.make_dataset(train_df)
+    train_ds: tf.data.Dataset = preprocessor.make_dataset(train_df)
     for inputs, targets in train_ds.take(1):
         assert inputs["english"].shape[0] > 0, "English input is empty!"
         assert inputs["french"].shape[0] > 0, "French input is empty!"
