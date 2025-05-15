@@ -134,7 +134,7 @@ def transformer_model(
     return transformer
 
 
-def test_translation(
+def translation_test(
     transformer: tf.keras.Model,
     preprocessor: TextPreprocessor,
     input_sentence: str = "Hello",
@@ -201,7 +201,7 @@ def main() -> None:
     )
 
     # Test the translation
-    test_translation(
+    translation_test(
         transformer,
         preprocessor,
         input_sentence="How are you?",
