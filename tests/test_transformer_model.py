@@ -1,6 +1,6 @@
 import pytest
 import tensorflow as tf
-from modules.data_processor import DatasetProcessor, TextPreprocessor
+from modules.data_processor import TextPreprocessor
 from modules.transformer_components import (
     PositionalEmbedding,
     TransformerEncoder,
@@ -8,8 +8,6 @@ from modules.transformer_components import (
     evaluate_bleu,
 )
 from translation_french_english import transformer_model
-from modules.utils import ModelPaths
-import os
 
 
 @pytest.fixture

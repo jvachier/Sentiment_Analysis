@@ -1,5 +1,6 @@
 from collections import Counter
-import nltk
+
+# import nltk
 import tensorflow as tf
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer

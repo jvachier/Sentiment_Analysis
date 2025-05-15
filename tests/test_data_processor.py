@@ -1,6 +1,5 @@
 import pytest
 import polars as pl
-import tensorflow as tf
 from modules.data_processor import DatasetProcessor, TextPreprocessor
 
 

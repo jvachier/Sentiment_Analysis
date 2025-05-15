@@ -1,6 +1,7 @@
 import tensorflow as tf
 import logging
 from nltk.translate.bleu_score import corpus_bleu, SmoothingFunction
+from typing import Any
 
 
 @tf.keras.utils.register_keras_serializable(package="Custom")
@@ -163,7 +164,9 @@ class TransformerDecoder(tf.keras.layers.Layer):
         return config
 
 
-def evaluate_bleu(model, dataset, preprocessor):
+def evaluate_bleu(
+    model: tf.keras.Model, dataset: tf.data.Dataset, preprocessor: Any
+) -> float:
     """
     Evaluate the BLEU score for the model on the given dataset.
 

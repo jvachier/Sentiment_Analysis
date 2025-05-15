@@ -21,7 +21,7 @@ class SpeechToText:
         recording (bool): Flag to indicate if recording is active.
     """
 
-    def __init__(self, model_path):
+    def __init__(self, model_path: str):
         """
         Initialize the SpeechToText class.
 
@@ -48,7 +48,7 @@ class SpeechToText:
         self.recognized_text = []
         self.recording = False
 
-    def start_recording(self):
+    def start_recording(self) -> None:
         """
         Start recording audio and process it for speech-to-text conversion.
         """
@@ -57,14 +57,14 @@ class SpeechToText:
         threading.Thread(target=self.record_audio).start()
         logging.info("Recording started.")
 
-    def stop_recording(self):
+    def stop_recording(self) -> None:
         """
         Stop recording audio.
         """
         self.recording = False
         logging.info("Recording stopped.")
 
-    def record_audio(self):
+    def record_audio(self) -> None:
         """
         Record audio from the microphone and convert it to text using Vosk.
         """
@@ -89,7 +89,7 @@ class SpeechToText:
                 text_file.write("\n".join(self.recognized_text))
             logging.info("Text written to recognized_text.txt")
 
-    def get_recognized_text(self):
+    def get_recognized_text(self) -> str:
         """
         Get the full recognized text.
 
@@ -98,7 +98,7 @@ class SpeechToText:
         """
         return " ".join(self.recognized_text)
 
-    def predict_sentiment(self, text):
+    def predict_sentiment(self, text: str) -> str:
         """
         Predict the sentiment of the given text using a pre-trained model.
 
