@@ -13,9 +13,9 @@ from translation_french_english import transformer_model
 
 
 @pytest.fixture
-def setup_data() -> (
-    Tuple[TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]
-):
+def setup_data() -> Tuple[
+    TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset
+]:
     """
     Fixture to set up a mocked dataset and preprocessor for testing.
 
