@@ -38,9 +38,9 @@ Before running the application, ensure you have:
    - Ensure the sentiment analysis inference model is available at the path defined in `ModelPaths.INFERENCE_MODEL.value`.
 
 5. **Dependencies**:
-   - Install all project dependencies using Poetry:
+   - Install all project dependencies using uv:
      ```bash
-     poetry install
+     uv sync
      ```
 
 ## How to Run
@@ -48,7 +48,7 @@ Before running the application, ensure you have:
 From the project root directory:
 
 ```bash
-poetry run python app.py
+uv run python app/voice_to_text_app.py
 ```
 
 The application will start and be accessible at: [http://127.0.0.1:8050](http://127.0.0.1:8050)

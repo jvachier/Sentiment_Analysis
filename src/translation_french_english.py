@@ -150,18 +150,27 @@ def translation_test(
     Returns:
         str: The translated sentence.
     """
-    en_vocab = preprocessor.target_vectorization.get_vocabulary()
-    en_index_lookup = dict(zip(range(len(en_vocab)), en_vocab))
+    # Get French vocabulary (target language) for decoding
+    fr_vocab = preprocessor.target_vectorization.get_vocabulary()
+    fr_index_lookup = dict(zip(range(len(fr_vocab)), fr_vocab))
+
+    # Debug: print vocabulary info
+    logging.info(f"French vocabulary size: {len(fr_vocab)}")
+    logging.info(f"First 10 French tokens: {fr_vocab[:10]}")
 
     tokenized_input_sentence = preprocessor.source_vectorization([input_sentence])
+    logging.info(f"Tokenized input: {tokenized_input_sentence}")
+
     decoded_sentence = "[start]"
     for i in range(20):
         tokenized_target_sentence = preprocessor.target_vectorization(
             [decoded_sentence]
         )[:, :-1]
         predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
+
         sampled_token_index = np.argmax(predictions[0, i, :])
-        sampled_token = en_index_lookup[sampled_token_index]
+        sampled_token = fr_index_lookup[sampled_token_index]
+
         decoded_sentence += " " + sampled_token
         if sampled_token == "[end]":
             break

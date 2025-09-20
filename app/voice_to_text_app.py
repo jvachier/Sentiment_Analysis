@@ -1,13 +1,24 @@
-import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output, State
 import base64
 import logging
-from modules.speech_to_text import SpeechToText
-from translation_french_english import test_translation, transformer_model
+import sys
+from pathlib import Path
+from typing import Any, Tuple
+
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output, State
+
+# Add src directory to Python path
+# src_path = Path(__file__).parent.parent / "src"
+# sys.path.insert(0, str(src_path))
+
 from modules.data_processor import DatasetProcessor, TextPreprocessor
+from modules.speech_to_text import SpeechToText
 from modules.utils import ModelPaths
-from typing import Tuple, Any
+from translation_french_english import (
+    translation_test as test_translation,
+    transformer_model,
+)
 
 # Configure logging
 logging.basicConfig(

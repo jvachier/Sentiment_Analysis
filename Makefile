@@ -4,8 +4,14 @@
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install all dependencies
-	uv sync --all-extras
+install: ## Install all dependencies including audio support
+	uv sync --extra audio --extra dev
+
+install-audio: ## Install with audio dependencies only
+	uv sync --extra audio
+
+install-dev: ## Install development dependencies only
+	uv sync --extra dev
 
 test: ## Run tests with coverage
 	uv run pytest tests/ --cov=src --cov=app --cov-report=term
