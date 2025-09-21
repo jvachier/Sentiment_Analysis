@@ -6,14 +6,11 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
-# Add src directory to Python path
-# src_path = Path(__file__).parent.parent / "src"
-# sys.path.insert(0, str(src_path))
 
-from modules.data_processor import DatasetProcessor, TextPreprocessor
-from modules.speech_to_text import SpeechToText
-from modules.utils import ModelPaths
-from translation_french_english import (
+from src.modules.data_processor import DatasetProcessor, TextPreprocessor
+from src.modules.speech_to_text import SpeechToText
+from src.modules.utils import ModelPaths
+from src.translation_french_english import (
     translation_test as test_translation,
     transformer_model,
 )
