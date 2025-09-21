@@ -140,15 +140,24 @@ def translation_test(
     input_sentence: str = "Hello",
 ) -> str:
     """
-    Test the Transformer model by translating an input sentence.
+    Test the English-to-French Transformer model by translating an English sentence to French.
+
+    This function performs autoregressive decoding to generate French translations from English input.
+    It uses the preprocessor's source vectorization (English) for encoding input and target
+    vectorization (French) for decoding output tokens.
 
     Args:
-        transformer (tf.keras.Model): The trained Transformer model.
-        preprocessor (TextPreprocessor): Preprocessor object for tokenization and vectorization.
-        input_sentence (str): The input sentence to translate.
+        transformer (tf.keras.Model): The trained English-to-French Transformer model.
+        preprocessor (TextPreprocessor): Preprocessor with source=English and target=French
+            vectorization layers for tokenization.
+        input_sentence (str): The English sentence to translate to French.
 
     Returns:
-        str: The translated sentence.
+        str: The translated French sentence without start/end tokens.
+
+    Example:
+        >>> result = translation_test(model, preprocessor, "Hello, how are you?")
+        >>> print(result)  # Expected: "Bonjour, comment allez-vous ?"
     """
     # Get French vocabulary (target language) for decoding
     fr_vocab = preprocessor.target_vectorization.get_vocabulary()
