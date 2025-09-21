@@ -3,7 +3,8 @@
 [![Deep Learning](https://img.shields.io/badge/Deep%20Learning-TensorFlow-orange)](https://www.tensorflow.org/)
 [![Keras](https://img.shields.io/badge/Keras-red)](https://keras.io/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0%2B-orange)](https://www.tensorflow.org/)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Sentiment Analysis and Translation
@@ -49,17 +50,21 @@ The sentiment analysis and translation models included in this repository are **
 ## Installation
 
 ### Prerequisites
-- Python 3.8 or higher
-- Poetry for dependency management
+- Python 3.11 or higher
+- uv for fast dependency management (10-100x faster than pip/poetry)
 
 ### Install Dependencies
-1. Install Poetry:
+1. Install uv:
    ```bash
-   pip install poetry
+   pip install uv
+   ```
+   Or on macOS/Linux:
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 2. Install project dependencies:
    ```bash
-   poetry install
+   uv sync
    ```
 
 ### Download the Vosk Model
@@ -74,6 +79,26 @@ The sentiment analysis and translation models included in this repository are **
    ├── vosk-model-en-us-0.22/
    └── ...
    ```
+
+### Quick Start with Makefile
+For easier development workflow, use the provided Makefile:
+
+```bash
+# Install all dependencies
+make install
+
+# Run tests
+make test
+
+# Check code quality
+make lint
+
+# Run the application
+make run
+
+# See all available commands
+make help
+```
 
 ---
 
@@ -109,7 +134,7 @@ Sentiment_Analysis/
 │   │   ├── sentiment_keras_binary.keras
 │   │   ├── transformer_best_model.keras
 │   │   ├── optuna_model_binary.json               # Best binary classification model parameters from Optuna
-│   │   └── optuna_transformer_best_params.json    # Best transformer model hyperparameters from Optuna 
+│   │   └── optuna_transformer_best_params.json    # Best transformer model hyperparameters from Optuna
 │   ├── configurations/             # Configuration files
 │   │   ├── model_builder_config.json
 │   │   ├── model_trainer_config.json
@@ -150,7 +175,7 @@ Sentiment_Analysis/
 ├── .gitignore                      # Git ignore file
 ├── LICENSE                         # License file
 ├── Makefile                        # Makefile for common tasks
-├── pyproject.toml                  # Poetry configuration file
+├── pyproject.toml                  # uv configuration file
 ├── README.md                       # Project documentation
 └── ruff.toml                       # Ruff configuration file
 ```
@@ -162,7 +187,7 @@ Sentiment_Analysis/
 ### Interactive Application
 1. **Run the Application**:
    ```bash
-   poetry run python app/voice_to_text_app.py
+   uv run python app/voice_to_text_app.py
    ```
 2. **Features**:
    - **Start Recording**: Begin recording your speech.
@@ -175,7 +200,7 @@ Sentiment_Analysis/
 ### Sentiment Analysis
 1. **Train or Load the Model**:
    ```bash
-   poetry run python src/sentiment_analysis.py
+   uv run python src/sentiment_analysis.py
    ```
    - If a saved model exists, it will be loaded.
    - Otherwise, a new model will be trained and saved in the `src/models/` folder.
@@ -190,7 +215,7 @@ Sentiment_Analysis/
    Place your English-French dataset in the `src/data/` folder.
 2. **Train or Load the Model**:
    ```bash
-   poetry run python src/translation_french_english.py
+   uv run python src/translation_french_english.py
    ```
    - If a saved model exists, it will be loaded.
    - Otherwise, a new model will be trained and saved in the `src/models/` folder.
@@ -215,9 +240,3 @@ Sentiment_Analysis/
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-## About
-
-This repository is designed for researchers, developers, and enthusiasts interested in exploring advanced NLP techniques. It provides a practical implementation of speech-to-text, sentiment analysis, and translation pipelines, along with an interactive web application.
-
-For questions or feedback, feel free to open an issue or contact the repository maintainers.

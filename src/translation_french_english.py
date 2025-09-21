@@ -1,12 +1,12 @@
 import logging
-from modules.data_processor import DatasetProcessor, TextPreprocessor
-from modules.transformer_components import (
+from src.modules.data_processor import DatasetProcessor, TextPreprocessor
+from src.modules.transformer_components import (
     evaluate_bleu,
     PositionalEmbedding,
     TransformerEncoder,
     TransformerDecoder,
 )
-from modules.utils import ModelPaths
+from src.modules.utils import ModelPaths
 import os
 import numpy as np
 
@@ -140,28 +140,46 @@ def translation_test(
     input_sentence: str = "Hello",
 ) -> str:
     """
-    Test the Transformer model by translating an input sentence.
+    Test the English-to-French Transformer model by translating an English sentence to French.
+
+    This function performs autoregressive decoding to generate French translations from English input.
+    It uses the preprocessor's source vectorization (English) for encoding input and target
+    vectorization (French) for decoding output tokens.
 
     Args:
-        transformer (tf.keras.Model): The trained Transformer model.
-        preprocessor (TextPreprocessor): Preprocessor object for tokenization and vectorization.
-        input_sentence (str): The input sentence to translate.
+        transformer (tf.keras.Model): The trained English-to-French Transformer model.
+        preprocessor (TextPreprocessor): Preprocessor with source=English and target=French
+            vectorization layers for tokenization.
+        input_sentence (str): The English sentence to translate to French.
 
     Returns:
-        str: The translated sentence.
+        str: The translated French sentence without start/end tokens.
+
+    Example:
+        >>> result = translation_test(model, preprocessor, "Hello, how are you?")
+        >>> print(result)  # Expected: "Bonjour, comment allez-vous ?"
     """
-    en_vocab = preprocessor.target_vectorization.get_vocabulary()
-    en_index_lookup = dict(zip(range(len(en_vocab)), en_vocab))
+    # Get French vocabulary (target language) for decoding
+    fr_vocab = preprocessor.target_vectorization.get_vocabulary()
+    fr_index_lookup = dict(zip(range(len(fr_vocab)), fr_vocab))
+
+    # Debug: print vocabulary info
+    logging.info(f"French vocabulary size: {len(fr_vocab)}")
+    logging.info(f"First 10 French tokens: {fr_vocab[:10]}")
 
     tokenized_input_sentence = preprocessor.source_vectorization([input_sentence])
+    logging.info(f"Tokenized input: {tokenized_input_sentence}")
+
     decoded_sentence = "[start]"
     for i in range(20):
         tokenized_target_sentence = preprocessor.target_vectorization(
             [decoded_sentence]
         )[:, :-1]
         predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
+
         sampled_token_index = np.argmax(predictions[0, i, :])
-        sampled_token = en_index_lookup[sampled_token_index]
+        sampled_token = fr_index_lookup[sampled_token_index]
+
         decoded_sentence += " " + sampled_token
         if sampled_token == "[end]":
             break

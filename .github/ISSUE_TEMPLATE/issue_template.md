@@ -16,9 +16,9 @@
 
 ## Steps to Reproduce
 <!-- For bugs, provide a step-by-step guide to reproduce the issue. Skip this section for feature requests. -->
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ## Expected Behavior
 <!-- Describe what you expected to happen. -->

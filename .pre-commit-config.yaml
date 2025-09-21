@@ -1,0 +1,34 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.8
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^(src/|app/|tests/).*\.py$
+      - id: ruff-format
+        files: ^(src/|app/|tests/).*\.py$
+        # Make ruff-format more flexible - only run when SKIP_FORMAT is not set
+        stages: [manual]
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run python -m pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        args: [tests/, -v]

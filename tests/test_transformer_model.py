@@ -2,20 +2,20 @@ import pytest
 import tensorflow as tf
 import pandas as pd
 from typing import Tuple
-from modules.data_processor import TextPreprocessor
-from modules.transformer_components import (
+from src.modules.data_processor import TextPreprocessor
+from src.modules.transformer_components import (
     PositionalEmbedding,
     TransformerEncoder,
     TransformerDecoder,
     evaluate_bleu,
 )
-from translation_french_english import transformer_model
+from src.translation_french_english import transformer_model
 
 
 @pytest.fixture
-def setup_data() -> (
-    Tuple[TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]
-):
+def setup_data() -> Tuple[
+    TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset
+]:
     """
     Fixture to set up a mocked dataset and preprocessor for testing.
 

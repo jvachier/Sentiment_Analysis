@@ -1,7 +1,7 @@
 import optuna
 import tensorflow as tf
-from modules.data_processor import DatasetProcessor, TextPreprocessor
-from modules.transformer_components import (
+from src.modules.data_processor import DatasetProcessor, TextPreprocessor
+from src.modules.transformer_components import (
     PositionalEmbedding,
     TransformerEncoder,
     TransformerDecoder,
