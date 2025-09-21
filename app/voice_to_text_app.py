@@ -1,7 +1,5 @@
 import base64
 import logging
-import sys
-from pathlib import Path
 from typing import Any, Tuple
 
 import dash
