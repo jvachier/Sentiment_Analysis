@@ -1,6 +1,10 @@
 import json
-from modules.model_sentiment_analysis import ModelTrainer, OptunaOptimizer, ModelBuilder
-from modules.utils import ModelPaths, OptunaPaths
+from src.modules.model_sentiment_analysis import (
+    ModelTrainer,
+    OptunaOptimizer,
+    ModelBuilder,
+)
+from src.modules.utils import ModelPaths, OptunaPaths
 
 
 def test_model_trainer_initialization():

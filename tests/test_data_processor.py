@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 import tensorflow as tf
 from typing import Dict
-from modules.data_processor import DatasetProcessor, TextPreprocessor
+from src.modules.data_processor import DatasetProcessor, TextPreprocessor
 
 
 @pytest.fixture

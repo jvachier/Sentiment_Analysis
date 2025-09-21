@@ -14,7 +14,7 @@ install-dev: ## Install development dependencies only
 	uv sync --extra dev
 
 test: ## Run tests with coverage
-	uv run pytest tests/ --cov=src --cov=app --cov-report=term
+	uv run python -m pytest tests/ --cov=src --cov=app --cov-report=term
 
 lint: ## Check and fix code quality
 	uv run ruff check --fix ./src ./app ./tests
