@@ -1,12 +1,12 @@
 import logging
-from modules.data_processor import DatasetProcessor, TextPreprocessor
-from modules.transformer_components import (
+from src.modules.data_processor import DatasetProcessor, TextPreprocessor
+from src.modules.transformer_components import (
     evaluate_bleu,
     PositionalEmbedding,
     TransformerEncoder,
     TransformerDecoder,
 )
-from modules.utils import ModelPaths
+from src.modules.utils import ModelPaths
 import os
 import numpy as np
 

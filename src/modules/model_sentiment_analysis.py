@@ -2,7 +2,7 @@ import tensorflow as tf
 import optuna
 import json
 import logging
-from modules.utils import ModelPaths, OptunaPaths
+from src.modules.utils import ModelPaths, OptunaPaths
 
 
 class ModelTrainer:

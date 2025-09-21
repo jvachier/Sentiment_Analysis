@@ -1,5 +1,5 @@
-from modules.load_data import DataLoader
-from modules.model_bert_other import SentimentModelBert
+from src.modules.load_data import DataLoader
+from src.modules.model_bert_other import SentimentModelBert
 
 
 def main():

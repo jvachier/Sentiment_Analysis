@@ -2,7 +2,7 @@ import logging
 import kaggle
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
-from modules.mem_reduction import MemoryReducer
+from src.modules.mem_reduction import MemoryReducer
 import pandas as pd
 from pydantic import BaseModel, Field, validator
 

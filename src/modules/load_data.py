@@ -1,7 +1,7 @@
 import pandas as pd
 import tensorflow as tf
 from pydantic import BaseModel, FilePath, Field, ValidationError
-from modules.utils import DatasetPaths
+from src.modules.utils import DatasetPaths
 
 
 class DataLoaderConfig(BaseModel):
