@@ -37,10 +37,10 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v2
 
-      # Install dependencies
+      # Install dependencies (dev only, audio not needed for tests)
       - name: Install dependencies
         run: |
-          uv sync --extra dev --extra audio
+          uv sync --extra dev
 
       # Run code quality checks
       - name: Run code quality checks
@@ -48,7 +48,7 @@ jobs:
           uv run ruff check ./src ./app ./tests
           uv run ruff format --check ./src ./app ./tests
 
-      # Run pytest
+      # Run pytest (excludes audio-dependent modules like speech_to_text)
       - name: Run tests with pytest
         run: |
-          uv run python -m pytest
+          uv run python -m pytest tests/ -v
