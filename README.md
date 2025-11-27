@@ -19,25 +19,68 @@ This repository provides a comprehensive solution for real-time **speech-to-text
 
 *Figure: High-level workflow of the application, including speech-to-text, sentiment analysis, and translation.*
 
+---
+
+## Key Highlights
+
+**From-Scratch Implementation**: Complete Transformer architecture built from the ground up, demonstrating deep understanding of attention mechanisms, positional encodings, and encoder-decoder architectures.
+
+**Production-Ready Pipeline**: End-to-end system integrating speech recognition, sentiment classification, and neural machine translation in a single application.
+
+**Research-Grade Code**: Clean, well-documented implementation suitable for educational purposes and research experimentation.
+
+**Hyperparameter Optimization**: Automated tuning with Optuna for both sentiment and translation models.
+
+---
+## Architecture
+
+### Translation Transformer Model
+
+The English-to-French translation system implements a **Transformer architecture built from scratch**. Rather than using pre-trained models or high-level APIs, this implementation provides full control over each component, from multi-head attention mechanisms to positional encodings.
+
+![Transformer Architecture](docs/images/translation_transformer.jpeg)
+
+*Figure: Detailed architecture of the Transformer model showing encoder-decoder structure with multi-head attention mechanisms.*
+
+### Sentiment Analysis Model
+
+The sentiment classifier uses a Bidirectional LSTM architecture:
+- Embedding layer for word representations
+- Bidirectional LSTM layers for capturing context from both directions
+- Dense layers with dropout for classification
+- Binary output (positive/negative sentiment)
 
 ---
 
 ## Features
 
+### Speech Processing
+- **Real-time Speech-to-Text**: Audio capture and transcription using Vosk library
+- **English Language Support**: Optimized for US English accent (vosk-model-en-us-0.22)
+- **Downloadable Transcripts**: Export recognized text as `.txt` files
+
 ### Sentiment Analysis
-- **Speech-to-Text**: Converts spoken audio into text using the Vosk library.
-- **Text Preprocessing**: Uses TensorFlow's `TextVectorization` layer to tokenize and vectorize text data.
-- **Bidirectional LSTM Model**: Implements a deep learning model with embedding, bidirectional LSTM, and dense layers for sentiment classification.
-- **Training and Evaluation**: Includes functionality to train the model on a dataset and evaluate its performance on validation and test sets.
-- **Inference**: Provides an inference pipeline to predict sentiment for new text inputs.
-- **Interactive Application**: A Dash-based web application for real-time speech-to-text and sentiment analysis.
+- **Bidirectional LSTM Architecture**: Deep learning model with embedding and recurrent layers
+- **TensorFlow Text Processing**: Efficient tokenization and vectorization with `TextVectorization`
+- **Binary Classification**: Positive/negative sentiment prediction
+- **Hyperparameter Optimization**: Automated tuning with Optuna
+- **Alternative Architectures**: Optional BERT-based models for comparison
 
 ### English-to-French Translation
-- **Transformer Model**: Implements a sequence-to-sequence Transformer model for English-to-French translation.
-- **BLEU Score Evaluation**: Evaluates the quality of translations using the BLEU metric.
-- **Preprocessing**: Includes utilities for tokenizing and vectorizing English and French text.
-- **Model Saving and Loading**: Supports saving and loading trained Transformer models for reuse.
-- **Integration with Speech-to-Text**: Translates recognized speech from English to French in real-time.
+- **From-Scratch Transformer Implementation**: Full encoder-decoder architecture built without pre-trained models
+- **Custom Multi-Head Attention**: Manually implemented attention mechanisms with configurable heads
+- **Positional Encoding**: Hand-crafted sinusoidal position embeddings
+- **BLEU Score Evaluation**: Translation quality metrics for model assessment
+- **Flexible Architecture**: Easily configurable dimensions, layers, and attention heads
+- **Model Persistence**: Save and load trained models for inference
+- **Real-time Integration**: Seamless connection with speech-to-text pipeline
+
+### Interactive Web Application
+- **Dash Framework**: Responsive web interface for real-time interaction
+- **Live Processing**: Instant speech recognition, sentiment analysis, and translation
+- **Visual Feedback**: Clear display of recognized text, sentiment, and translations
+- **Export Functionality**: Download transcripts for offline use
+
 
 ---
 
@@ -240,3 +283,16 @@ Sentiment_Analysis/
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
 ---
+
+## Citation
+
+If you use this project in your research or work, please cite:
+
+```bibtex
+@software{sentiment_translation_2025,
+  author = {Vachier, Jeremy},
+  title = {Sentiment Analysis and Translation},
+  year = {2025},
+  url = {https://github.com/jvachier/Sentiment_Analysis}
+}
+```
