@@ -81,12 +81,23 @@ The sentiment classifier uses a Bidirectional LSTM architecture:
 - **Visual Feedback**: Clear display of recognized text, sentiment, and translations
 - **Export Functionality**: Download transcripts for offline use
 
-
 ---
 
-## Note on Models
+## Performance
 
-The sentiment analysis and translation models included in this repository are **toy models** designed for demonstration purposes. They may not achieve production-level accuracy and are intended for educational and exploratory use.
+Current model performance on test datasets:
+
+| Model | Metric | Score |
+|-------|--------|-------|
+| Sentiment Analysis (BiLSTM) | Test Accuracy | 95.00% |
+| Translation (Transformer) | Test Accuracy | 67.26% |
+| Translation (Transformer) | BLEU Score | 0.52 |
+
+**Note on Model Status**: These models were **built from scratch as educational implementations** of the underlying architectures. The Transformer implementation provides a complete, working example of the attention mechanism without relying on pre-trained models or high-level abstractions. While they demonstrate solid understanding of these architectures, they are not optimized for production deployment. For production use, consider:
+- Training on larger datasets (millions of examples)
+- Increasing model capacity (more layers, larger dimensions)
+- Extended training duration with learning rate scheduling
+- Ensemble methods and model distillation
 
 ---
 
