@@ -282,6 +282,18 @@ Sentiment_Analysis/
 
 ---
 
+## Kaggle Notebooks
+
+**English-French Transformer: From-Scratch Implementation**
+- Interactive walkthrough with step-by-step explanations
+- Complete training process with visualizations
+- BLEU score evaluation and attention analysis
+- [View on Kaggle](https://www.kaggle.com/code/jvachier/transformer-nmt-en-fr)
+
+This Kaggle notebook provides a detailed tutorial on the transformer architecture implemented in this repository.
+
+---
+
 ## Customization
 
 - Modify hyperparameters like `embed_dim`, `dense_dim`, and `num_heads` in `src/translation_french_english.py` for the Transformer model.
