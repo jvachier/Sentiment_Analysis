@@ -37,6 +37,7 @@ def test_dataset_processor(sample_data: pl.DataFrame) -> None:
     data_splits: Dict[str, pl.DataFrame] = processor.shuffle_and_split()
 
     # Check if the data is processed correctly
+    assert processor.split_df is not None, "Split dataframe is None!"
     assert len(processor.split_df) > 0, "Processed dataset is empty!"
     assert "fr" in processor.split_df.columns, "'fr' column is missing!"
     assert processor.split_df["fr"][0].startswith("[start]"), "Start token missing!"

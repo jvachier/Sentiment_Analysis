@@ -48,6 +48,11 @@ jobs:
           uv run ruff check ./src ./app ./tests
           uv run ruff format --check ./src ./app ./tests
 
+      # Run mypy type checking
+      - name: Run mypy type checking
+        run: |
+          uv run mypy src/ app/ tests/ --ignore-missing-imports
+
       # Run pytest (excludes audio-dependent modules like speech_to_text)
       - name: Run tests with pytest
         run: |

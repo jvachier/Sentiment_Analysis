@@ -62,7 +62,10 @@ class ModelTrainer:
                 callbacks=[early_stopping_callback, callbacks_model],
             )
             test_results = model.evaluate(test_data)
-        logging.info("Test Accuracy: {:.2f}%".format(test_results[1] * 100))
+        if isinstance(test_results, list):
+            logging.info("Test Accuracy: {:.2f}%".format(test_results[1] * 100))
+        else:
+            logging.info("Test Accuracy: {:.2f}%".format(test_results * 100))
 
     def inference_model(
         self, model: tf.keras.Model, text_vec: tf.keras.layers.TextVectorization
@@ -77,10 +80,10 @@ class ModelTrainer:
         Returns:
             tf.keras.Model: An inference model for sentiment prediction.
         """
-        inputs = tf.keras.Input(shape=(1,), dtype=tf.string)
+        inputs: tf.Tensor = tf.keras.Input(shape=(1,), dtype=tf.string)
         process_inputs = text_vec(inputs)
         outputs = model(process_inputs)
-        inference_model = tf.keras.Model(inputs=inputs, outputs=outputs)
+        inference_model: tf.keras.Model = tf.keras.Model(inputs=inputs, outputs=outputs)
         return inference_model
 
 
@@ -121,7 +124,7 @@ class OptunaOptimizer:
             test_data (tf.data.Dataset): Test dataset.
         """
 
-        def _objective(trial):
+        def _objective(trial: optuna.trial.Trial) -> float:
             """
             Objective function for Optuna to optimize the model's hyperparameters.
 
@@ -141,7 +144,7 @@ class OptunaOptimizer:
                 )
             )
             n_layers_bidirectional = trial.suggest_int("n_units_bidirectional", 1, 3)
-            for i in range(n_layers_bidirectional):
+            for i in range(n_layers_bidirectional):  # type: int
                 num_hidden_bidirectional = trial.suggest_int(
                     f"n_units_bidirectional_l{i}", 64, 128, log=True
                 )
@@ -165,8 +168,8 @@ class OptunaOptimizer:
 
             model.add(tf.keras.layers.Dropout(self.dropout_rate))
             n_layers_nn = trial.suggest_int("n_layers_nn", 1, 2)
-            for i in range(n_layers_nn):
-                num_hidden_nn = trial.suggest_int(f"n_units_nn_l{i}", 64, 128, log=True)
+            for j in range(n_layers_nn):
+                num_hidden_nn = trial.suggest_int(f"n_units_nn_l{j}", 64, 128, log=True)
                 model.add(tf.keras.layers.Dense(num_hidden_nn, activation="gelu"))
 
             model.add(tf.keras.layers.Dropout(self.dropout_rate))
@@ -199,7 +202,9 @@ class OptunaOptimizer:
                 )
             # Evaluate the model accuracy on the validation set.
             score = model.evaluate(test_data, verbose=1)
-            return score[1]
+            if isinstance(score, list):
+                return float(score[1])
+            return float(score)
 
         # Create an Optuna study
         study = optuna.create_study(
@@ -267,7 +272,7 @@ class ModelBuilder:
         dropout_layer2 = tf.keras.layers.Dropout(self.dropout_rate)(dense_layer2)
         dense_layer3 = tf.keras.layers.Dense(32, activation="gelu")(dropout_layer2)
         outputs = tf.keras.layers.Dense(1, activation="sigmoid")(dense_layer3)
-        model = tf.keras.Model(inputs=inputs, outputs=outputs)
+        model: tf.keras.Model = tf.keras.Model(inputs=inputs, outputs=outputs)
         model.compile(
             optimizer=tf.keras.optimizers.RMSprop(),
             loss=tf.keras.losses.BinaryCrossentropy(),
@@ -282,13 +287,9 @@ class ModelBuilder:
         Returns:
             dict: A dictionary containing the model's configuration.
         """
-        config = super().get_config()
-        config.update(
-            {
-                "embedding_dim": self.embedding_dim,
-                "lstm_units": self.lstm_units,
-                "dropout_rate": self.dropout_rate,
-                "max_token": self.max_token,
-            }
-        )
-        return config
+        return {
+            "embedding_dim": self.embedding_dim,
+            "lstm_units": self.lstm_units,
+            "dropout_rate": self.dropout_rate,
+            "max_token": self.max_token,
+        }

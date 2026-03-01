@@ -61,7 +61,9 @@ def build_transformer_model(
         dropout_outputs
     )
 
-    transformer = tf.keras.Model([encoder_inputs, decoder_inputs], final_outputs)
+    transformer: tf.keras.Model = tf.keras.Model(
+        [encoder_inputs, decoder_inputs], final_outputs
+    )
 
     # Compile the model
     transformer.compile(

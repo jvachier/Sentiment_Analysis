@@ -25,6 +25,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        files: ^(src/|app/|tests/).*\.py$
+        args: [--ignore-missing-imports]
+
       - id: pytest
         name: pytest
         entry: uv run python -m pytest

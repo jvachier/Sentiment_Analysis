@@ -1,10 +1,21 @@
 [![Linting: Ruff](https://img.shields.io/badge/linting-ruff-yellowgreen)](https://github.com/charliermarsh/ruff)
+[![Type Checking: mypy](https://img.shields.io/badge/type%20checking-mypy-blue)](http://mypy-lang.org/)
 [![CI: Passed](https://img.shields.io/badge/CI-Passed-brightgreen)](https://github.com/jvachier/Sentiment_Analysis/actions/workflows/test.yaml)
+[![Tests: pytest](https://img.shields.io/badge/tests-pytest-orange)](https://docs.pytest.org/)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Deep Learning](https://img.shields.io/badge/Deep%20Learning-TensorFlow-orange)](https://www.tensorflow.org/)
 [![Keras](https://img.shields.io/badge/Keras-red)](https://keras.io/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.0%2B-orange)](https://www.tensorflow.org/)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue)](https://www.python.org/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![NLP](https://img.shields.io/badge/NLP-Natural%20Language%20Processing-green)](https://en.wikipedia.org/wiki/Natural_language_processing)
+[![Transformers](https://img.shields.io/badge/Transformers-From%20Scratch-blueviolet)](https://arxiv.org/abs/1706.03762)
+[![Neural Machine Translation](https://img.shields.io/badge/Neural-Machine%20Translation-purple)](https://en.wikipedia.org/wiki/Neural_machine_translation)
+[![Sentiment Analysis](https://img.shields.io/badge/Sentiment-Analysis-pink)](https://en.wikipedia.org/wiki/Sentiment_analysis)
+[![Speech Recognition](https://img.shields.io/badge/Speech-Recognition-cyan)](https://en.wikipedia.org/wiki/Speech_recognition)
+[![Gradio](https://img.shields.io/badge/UI-Gradio-ff7c00)](https://gradio.app/)
+[![Optuna](https://img.shields.io/badge/Hyperparameter-Optuna-lightblue)](https://optuna.org/)
+[![Dash](https://img.shields.io/badge/Dashboard-Dash-blue)](https://dash.plotly.com/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Sentiment Analysis and Translation
@@ -291,6 +302,17 @@ Sentiment_Analysis/
 - [View on Kaggle](https://www.kaggle.com/code/jvachier/transformer-nmt-en-fr)
 
 This Kaggle notebook provides a detailed tutorial on the transformer architecture implemented in this repository.
+
+---
+
+## Live Demo
+
+** HuggingFace Space: English-to-French Translator**
+- Try the enhanced Transformer model live in your browser
+- Real-time translation with greedy and beam search decoding
+- No installation required - instant access
+- [Launch Demo on HuggingFace](https://huggingface.co/spaces/Jvachier/transformer-nmt-en-fr)
+
 
 ---
 

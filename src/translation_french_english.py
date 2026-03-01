@@ -84,7 +84,9 @@ def transformer_model(
         dropout_outputs
     )
 
-    transformer = tf.keras.Model([encoder_inputs, decoder_inputs], final_outputs)
+    transformer: tf.keras.Model = tf.keras.Model(
+        [encoder_inputs, decoder_inputs], final_outputs
+    )
 
     # Compile the model
     transformer.compile(
@@ -161,7 +163,7 @@ def translation_test(
     """
     # Get French vocabulary (target language) for decoding
     fr_vocab = preprocessor.target_vectorization.get_vocabulary()
-    fr_index_lookup = dict(zip(range(len(fr_vocab)), fr_vocab))
+    fr_index_lookup: dict[int, str] = {i: word for i, word in enumerate(fr_vocab)}
 
     # Debug: print vocabulary info
     logging.info(f"French vocabulary size: {len(fr_vocab)}")
@@ -177,7 +179,7 @@ def translation_test(
         )[:, :-1]
         predictions = transformer([tokenized_input_sentence, tokenized_target_sentence])
 
-        sampled_token_index = np.argmax(predictions[0, i, :])
+        sampled_token_index: int = int(np.argmax(predictions[0, i, :]))
         sampled_token = fr_index_lookup[sampled_token_index]
 
         decoded_sentence += " " + sampled_token
@@ -228,7 +230,10 @@ def main() -> None:
     # Evaluate the model
     logging.info("Evaluating the model on the test dataset.")
     results = transformer.evaluate(test_ds)
-    logging.info(f"Test loss: {results[0]}, Test accuracy: {results[1]}")
+    if isinstance(results, list):
+        logging.info(f"Test loss: {results[0]}, Test accuracy: {results[1]}")
+    else:
+        logging.info(f"Test loss: {results}, Test accuracy: N/A")
 
     # Calculate BLEU score
     bleu_score = evaluate_bleu(transformer, test_ds, preprocessor)

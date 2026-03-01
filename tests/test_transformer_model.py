@@ -13,9 +13,9 @@ from src.translation_french_english import transformer_model
 
 
 @pytest.fixture
-def setup_data() -> Tuple[
-    TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset
-]:
+def setup_data() -> (
+    Tuple[TextPreprocessor, tf.data.Dataset, tf.data.Dataset, tf.data.Dataset]
+):
     """
     Fixture to set up a mocked dataset and preprocessor for testing.
 
@@ -130,9 +130,10 @@ def test_transformer_model_evaluation(
     )
 
     # Evaluate the model
-    results: list[float] = model.evaluate(test_ds, verbose=0)
+    results = model.evaluate(test_ds, verbose=0)
 
     # Check if evaluation results are returned
+    assert isinstance(results, list), "Evaluation did not return a list."
     assert len(results) == 2, "Evaluation did not return loss and accuracy."
     assert results[0] >= 0, "Test loss is invalid."
     assert 0 <= results[1] <= 1, "Test accuracy is invalid."
@@ -185,12 +186,12 @@ def test_transformer_model_loading(
     model.save(transformer_model_path)
 
     # Load the model
-    loaded_model: tf.keras.Model = tf.keras.models.load_model(
+    loaded_model = tf.keras.models.load_model(
         transformer_model_path,
         custom_objects={
-            "PositionalEmbedding": PositionalEmbedding,
-            "TransformerEncoder": TransformerEncoder,
-            "TransformerDecoder": TransformerDecoder,
+            "PositionalEmbedding": PositionalEmbedding,  # type: ignore[dict-item]
+            "TransformerEncoder": TransformerEncoder,  # type: ignore[dict-item]
+            "TransformerDecoder": TransformerDecoder,  # type: ignore[dict-item]
         },
     )
 

@@ -1,5 +1,5 @@
 # Makefile for Sentiment Analysis
-.PHONY: help install test lint format clean run
+.PHONY: help install test lint format clean run type-check
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -19,6 +19,12 @@ test: ## Run tests with coverage
 lint: ## Check and fix code quality
 	uv run ruff check --fix ./src ./app ./tests
 	uv run ruff format ./src ./app ./tests
+
+type-check: ## Run mypy type checking
+	uv run mypy src/ app/ tests/
+
+type-check-strict: ## Run mypy with strict mode
+	uv run mypy --strict src/ app/
 
 format: ## Format code only
 	uv run ruff format ./src ./app ./tests

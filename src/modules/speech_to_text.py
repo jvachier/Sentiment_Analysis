@@ -45,7 +45,7 @@ class SpeechToText:
         )
         self.stream.start_stream()
         self.rec = vosk.KaldiRecognizer(self.model, 16000)
-        self.recognized_text = []
+        self.recognized_text: list[str] = []
         self.recording = False
 
     def start_recording(self) -> None:

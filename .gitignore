@@ -195,3 +195,4 @@ src/models/*.json
 
 
 app_simple.py
+mypy_output.txt
