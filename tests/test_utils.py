@@ -84,15 +84,15 @@ def test_enum_uniqueness():
     """Test that enum values are unique."""
     # Check ModelPaths
     model_values = [item.value for item in ModelPaths]
-    assert len(model_values) == len(
-        set(model_values)
-    ), "ModelPaths has duplicate values"
+    assert len(model_values) == len(set(model_values)), (
+        "ModelPaths has duplicate values"
+    )
 
     # Check OptunaPaths
     optuna_values = [item.value for item in OptunaPaths]
-    assert len(optuna_values) == len(
-        set(optuna_values)
-    ), "OptunaPaths has duplicate values"
+    assert len(optuna_values) == len(set(optuna_values)), (
+        "OptunaPaths has duplicate values"
+    )
 
 
 def test_enum_string_conversion():
