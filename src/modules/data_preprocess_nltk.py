@@ -78,7 +78,7 @@ class TextPreprocessor:
         """
         text = text_tensor.numpy().decode("utf-8")
         text = self.preprocess_text(text)
-        encoded_text = self.tokenizer.texts_to_sequences([text])[0]
+        encoded_text = self.tokenizer.texts_to_sequences([text])[0]  # type: ignore[union-attr]
         return encoded_text, label
 
     def fit_tokenizer(self, ds_raw):
@@ -163,7 +163,7 @@ class TextPreprocessorNoLabel:
         """
         text = text_tensor.numpy().decode("utf-8")
         text = self.preprocess_text(text)
-        encoded_text = self.tokenizer.texts_to_sequences([text])[0]
+        encoded_text = self.tokenizer.texts_to_sequences([text])[0]  # type: ignore[union-attr]
         return encoded_text
 
     def fit_tokenizer(self, ds_raw):

@@ -18,6 +18,16 @@ tags:
   - tensorflow
   - keras
   - from-scratch
+  - nlp
+  - seq2seq
+  - attention-mechanism
+  - encoder-decoder
+  - deep-learning
+  - machine-translation
+  - multilingual
+  - text-generation
+  - custom-model
+  - educational
 ---
 
 # English to French Enhanced Transformer

@@ -118,7 +118,7 @@ class TransformerDecoder(tf.keras.layers.Layer):
         self.layernorm_3 = tf.keras.layers.LayerNormalization()
         super().build(input_shape)
 
-    def call(self, inputs, encoder_outputs, mask=None):
+    def call(self, inputs, encoder_outputs, mask=None):  # type: ignore[override]
         causal_mask = self.get_causal_attention_mask(inputs)
         if mask is not None:
             padding_mask = tf.cast(mask[:, tf.newaxis, tf.newaxis, :], dtype="float32")
@@ -214,8 +214,8 @@ def evaluate_bleu(
             references.append([ref_sentence])
 
     # Calculate BLEU score
-    bleu_score = corpus_bleu(
-        references, candidates, smoothing_function=smoothing_function
+    bleu_score = float(
+        corpus_bleu(references, candidates, smoothing_function=smoothing_function)
     )
     logging.info(f"BLEU score evaluation completed: {bleu_score:.4f}")
     return bleu_score

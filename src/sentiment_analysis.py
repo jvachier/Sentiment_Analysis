@@ -60,6 +60,9 @@ def main() -> None:
         valid_data = vectorized_dataset.get("valid_data")
         test_data = vectorized_dataset.get("test_data")
 
+        if train_data is None or valid_data is None or test_data is None:
+            raise ValueError("Failed to vectorize datasets")
+
     # Initialize the sentiment analysis model
     logging.info("Initializing the sentiment analysis model.")
 

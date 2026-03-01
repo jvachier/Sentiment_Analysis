@@ -141,7 +141,9 @@ class SentimentModelBert:
         dropout = tf.keras.layers.Dropout(0.3)(cls_token)
         output = tf.keras.layers.Dense(1, activation="sigmoid")(dropout)
 
-        model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs=output)
+        model: tf.keras.Model = tf.keras.Model(
+            inputs=[input_ids, attention_mask], outputs=output
+        )
         model.compile(
             optimizer=tf.keras.optimizers.legacy.RMSprop(
                 learning_rate=self.learning_rate

@@ -2,7 +2,7 @@ import polars as pl
 import tensorflow as tf
 import string
 import re
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 
 class DatasetProcessor:
@@ -20,7 +20,8 @@ class DatasetProcessor:
         """
         self.file_path = file_path
         self.delimiters = delimiters
-        self.split_df = None
+        self.split_df: Optional[pl.DataFrame] = None
+        self.df: Optional[pl.DataFrame] = None
 
     def load_data(self) -> None:
         """Load the Parquet file using Polars."""
@@ -28,6 +29,11 @@ class DatasetProcessor:
 
     def process_data(self) -> None:
         """Process the dataset by splitting, cleaning, and tokenizing."""
+        if self.df is None:
+            raise ValueError(
+                "Data must be loaded before processing. Call load_data() first."
+            )
+
         # Split the 'en' column into rows based on delimiters
         if "en" in self.df.columns:
             en_split = self.df.select(pl.col("en").str.split(self.delimiters)).explode(
@@ -76,6 +82,9 @@ class DatasetProcessor:
         """
 
         # Calculate the number of samples for validation and test sets
+        if self.split_df is None:
+            raise ValueError("Data must be processed before splitting")
+
         num_val_samples = int(val_split * len(self.split_df))
         num_train_samples = len(self.split_df) - 2 * num_val_samples
 

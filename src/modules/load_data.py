@@ -1,6 +1,6 @@
 import pandas as pd
 import tensorflow as tf
-from pydantic import BaseModel, FilePath, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from src.modules.utils import DatasetPaths
 
 
@@ -9,7 +9,7 @@ class DataLoaderConfig(BaseModel):
     Configuration for the DataLoader class.
     """
 
-    data_path: FilePath = Field(
+    data_path: str = Field(
         default=DatasetPaths.RAW_DATA.value,
         description="Path to the CSV file containing the dataset.",
     )

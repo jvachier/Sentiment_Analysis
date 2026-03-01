@@ -58,7 +58,7 @@ def create_or_load_inference_model(
         return tf.keras.models.load_model(inference_model_path)
 
     logging.info("Creating and saving the inference model.")
-    trainer = ModelTrainer()
+    trainer = ModelTrainer(config_path=ModelPaths.MODEL_TRAINER_CONFIG.value)
     inference_model = trainer.inference_model(model, text_vec)
     inference_model.save(inference_model_path)
     return inference_model
