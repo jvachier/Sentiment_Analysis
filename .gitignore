@@ -192,3 +192,6 @@ src/models/*.json
 
 # Jupyter Notebook
 *.ipynb
+
+
+app_simple.py
